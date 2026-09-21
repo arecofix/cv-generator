@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n_arecofix
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - N8N_HOST=n8n.arecofix.com.ar
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.arecofix.com.ar/
+      - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD="#Ar3c0f1x7315"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./templates:/templates
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: gotenberg
+    restart: always
+    command:
+      - "gotenberg"
+      - "--api-port=3000"
+
+volumes:
+  n8n_data:

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: gotenberg
+    command:
+      - "gotenberg"
+      - "--api-port=3000"
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=n8n.local
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://<tu-dominio-n8n>/
+      - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  webapp:
+    image: nginx:alpine
+    container_name: cvyou_webapp
+    ports:
+      - "8080:80"
+    volumes:
+      - ./webapp:/usr/share/nginx/html
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    name: app-network
+    driver: bridge
+
+volumes:
+  n8n_data:

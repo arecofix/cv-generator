@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CV - {{nombre_completo}} | {{titulo_adaptado}}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400&display=swap');
+        
+        @page { 
+            size: A4; 
+            margin: 2cm; 
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'EB Garamond', 'Times New Roman', serif;
+            font-size: 11pt;
+            line-height: 1.3;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1 {
+            font-size: 24pt;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .contact-info {
+            text-align: center;
+            font-size: 10pt;
+            margin-bottom: 20px;
+        }
+
+        .contact-info a { color: #000; text-decoration: none; }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding-bottom: 2px;
+        }
+
+        .experience-item { margin-bottom: 15px; }
+
+        .experience-header, .experience-subheader {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .experience-header { font-weight: 700; }
+        .experience-subheader { font-style: italic; margin-bottom: 5px; }
+
+        ul { list-style-type: disc; padding-left: 20px; }
+        li { margin-bottom: 4px; }
+
+        .education-item { margin-bottom: 10px; }
+        .education-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-weight: 700;
+        }
+        .education-subheader { font-style: italic; font-size: 10pt; }
+
+        .skills-section p { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <h1>{{nombre_completo}}</h1>
+    <div class="contact-info">
+        {{ciudad}} | <a href="mailto:{{email}}">{{email}}</a> | {{telefono}} | <a href="{{linkedin_url}}">LinkedIn</a> | <a href="{{github_url}}">GitHub</a>
+    </div>
+
+    <h2>Perfil Profesional</h2>
+    <p>{{resumen_perfil}}</p>
+
+    <h2>Experiencia Profesional</h2>
+    {{experiencias_html}}
+
+    <h2>Educación y Certificaciones</h2>
+    {{educacion_html}}
+
+    <h2>Habilidades Técnicas</h2>
+    <div class="skills-section">
+        <p>{{skills_html}}</p>
+    </div>
+</body>
+</html>

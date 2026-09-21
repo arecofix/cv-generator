@@ -1,0 +1,266 @@
+{
+  "id": "cv-generator-workflow",
+  "name": "CV Generator Anti-ATS v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cv-generator",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "webhookId": "cv-generator-id",
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=AQ.Ab8RN6JALdg3PN6-t0hlwP2IytcDCE0eaajnL2QpNDTim7RpbA",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [\n    {\n      parts: [\n        {\n          text: \"Eres un Analista de Adquisición de Talento Técnico. Analiza la siguiente descripción de puesto (Job Description) y extrae la información en un formato JSON estricto.\\nDevuelve ÚNICAMENTE el objeto JSON, sin texto adicional ni bloques markdown.\\nEstructura requerida:\\n{\\n  \\\"titulo_puesto_exacto\\\": \\\"...\\\",\\n  \\\"tecnologias_requeridas\\\": [\\\"...\\\"],\\n  \\\"soft_skills\\\": [\\\"...\\\"],\\n  \\\"palabras_clave_principales\\\": [\\\"...\\\", \\\"...\\\", \\\"...\\\"]\\n}\\n\\nJob Description: \" + ($json.body.job_description || '')\n        }\n      ]\n    }\n  ],\n  generationConfig: {\n    responseMimeType: \"application/json\"\n  }\n}) }}",
+        "options": {}
+      },
+      "name": "IA - Analista RRHH",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        200,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 65000
+    },
+    {
+      "parameters": {
+        "url": "http://kong:8000/rest/v1/experiencia_laboral?select=*",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Supabase Experiencia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        400,
+        200
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "http://kong:8000/rest/v1/educacion_y_skills?select=*",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Supabase Educacion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        400,
+        400
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Master CV consolidado en Español e Inglés\nconst master_cv_es = {\n  experiencia_laboral: [\n    {\n      empresa: 'IAP / Eddis Educativa (Merlo)',\n      puesto_base: 'Profesor de Reparación de Celulares y Electrónica',\n      fecha_inicio: '2024',\n      fecha_fin: 'Actualidad',\n      bullet_points: [\n        'Dictado de talleres técnicos avanzados enfocados en diagnóstico, reparación y microsoldadura de equipos electrónicos.',\n        'Capacitación en mantenimiento de hardware, lectura de diagramas, uso de instrumentos de medición y resolución estructurada de fallas.',\n        'Fomento de buenas prácticas en servicio técnico y trato al cliente.'\n      ]\n    },\n    {\n      empresa: 'Municipio de Marcos Paz, Buenos Aires, Argentina',\n      puesto_base: 'Equipo Técnico Reparación de artículos electrónicos y soluciones en informática',\n      fecha_inicio: '2022',\n      fecha_fin: '2024',\n      bullet_points: [\n        'Mantenimiento y gestión integral de la plataforma web del programa Envión (PHP, MySQL), administrando de forma centralizada las bases de datos de los beneficiarios.',\n        'Optimicé el control de asistencia y análisis de métricas mediante Excel, logrando reducir significativamente los errores administrativos.',\n        'Complementé este rol técnico con trabajo de campo: entrevistas de admisión y seguimiento territorial activo para asegurar la retención de usuarios, además de gestionar de forma autónoma la administración de mis servicios de AFIP.'\n      ]\n    },\n    {\n      empresa: 'Proyectos Destacados / Independiente',\n      puesto_base: 'Desarrollador de Software Independiente',\n      fecha_inicio: '2020',\n      fecha_fin: 'Actualidad',\n      bullet_points: [\n        'Desarrollo y despliegue end-to-end de aplicaciones (Angular, Python, Supabase).',\n        'En Arecofix implementé un sistema de gestión con arquitectura offline-first y sincronización asíncrona de datos.',\n        'Para Zarx (app de monitoreo), diseñé el modelo relacional y optimicé la concurrencia mediante conexiones en tiempo real.'\n      ]\n    }\n  ],\n  educacion_y_skills: [\n    {\n      institucion: 'Universidad Nacional del Oeste',\n      titulo: 'Licenciatura en Informática',\n      fecha_inicio: '2023',\n      fecha_fin: 'Actualidad',\n      detalles: [\n        'Proyecto Destacado: Creación de un chat institucional en tiempo real integrando inteligencia artificial mediante arquitectura RAG. Desarrollo implementado con Python y conexiones mediante Supabase.'\n      ]\n    },\n    {\n      institucion: 'Instituto superior de formación técnica N 177',\n      titulo: 'Tecnicatura superior en análisis de sistemas',\n      fecha_inicio: '2020',\n      fecha_fin: '2023',\n      detalles: [\n        'Proyectos realizados: Academia virtual desarrollada en Python con Framework Django y conexión Sqlite.',\n        'Sistema de gestión desarrollado en Java con metodología de Programación Orientada a objetos.'\n      ]\n    },\n    {\n      institucion: 'Licencias y Capacitaciones',\n      titulo: 'Certificados',\n      fecha_inicio: '',\n      fecha_fin: '',\n      detalles: [\n        'Certificado de Programación en Python (Argentina Programa).',\n        'Registro de conducir.',\n        'Certificado en Fundamentos de bases de datos otorgado por la Ciudad de Buenos Aires.',\n        'Certificado en Instalación Eléctrica Domiciliaria.'\n      ]\n    }\n  ],\n  skills: {\n    idiomas: 'Inglés (B2)',\n    languages: 'Python, TypeScript, Java, SQL, JavaScript',\n    backend_databases: 'Django, Flask, Spring Boot, Supabase, PostgreSQL, MySQL',\n    frontend: 'Angular, React, Tailwind CSS, HTML5/CSS3',\n    devops_tools: 'Docker, Git, Linux/Bash, AWS, Cypress'\n  }\n};\n\nconst master_cv_en = {\n  experiencia_laboral: [\n    {\n      empresa: 'Mobile Phone and Electronics Repair Teacher IAP (Marcos Paz) / Eddis Educativa (Merlo)',\n      puesto_base: 'Mobile Phone and Electronics Repair Teacher',\n      fecha_inicio: '2024',\n      fecha_fin: 'Present',\n      bullet_points: [\n        'Teaching technical workshops focused on hardware diagnosis, microcircuit logic, and structured problem-solving.'\n      ]\n    },\n    {\n      empresa: 'Technical Team - Electronic Equipment Repair and IT Solutions, Municipio de Marcos Paz',\n      puesto_base: 'Technical Team - Electronic Equipment Repair and IT Solutions',\n      fecha_inicio: '2022',\n      fecha_fin: '2024',\n      bullet_points: [\n        'Design and implementation of a digital registration system for the Envión program using Python (Django) and PostgreSQL, reducing administrative errors by 30%.',\n        'Development of RESTful APIs for internal systems integration and implementation of cloud infrastructure (AWS), optimizing platform scalability.',\n        'Technological training: Teaching technical and computer workshops for more than 50 beneficiaries.'\n      ]\n    },\n    {\n      empresa: 'Freelance Software Developer / Featured Projects',\n      puesto_base: 'Freelance Software Developer',\n      fecha_inicio: '2020',\n      fecha_fin: 'Present',\n      bullet_points: [\n        'End-to-end design and development of web and mobile solutions (Zarx, Arecofix) using Angular, Python, and Supabase.',\n        'Implementation of automations, audit scripts, and creation of a real-time institutional chat integrating artificial intelligence via RAG (Retrieval-Augmented Generation) architecture.'\n      ]\n    }\n  ],\n  educacion_y_skills: [\n    {\n      institucion: 'Universidad Nacional del Oeste',\n      titulo: \"Bachelor's Degree in Computer Science\",\n      fecha_inicio: '2022',\n      fecha_fin: 'Present',\n      detalles: [\n        'Institutional website with e-commerce integration and stock management through a CRUD system. Built with Laravel, MySQL, Docker, Tailwind CSS, using Linux/Bash.'\n      ]\n    },\n    {\n      institucion: 'Argentina Programa',\n      titulo: 'Programacion en Python',\n      fecha_inicio: '2021',\n      fecha_fin: '2022',\n      detalles: [\n        'POO: Personal Portfolio developed using the Django Framework. National program for training in Programming and Software Development.'\n      ]\n    },\n    {\n      institucion: 'Licenses and Certifications',\n      titulo: 'Certificates',\n      fecha_inicio: '',\n      fecha_fin: '',\n      detalles: [\n        'Certificate in Database Fundamentals issued by the City of Buenos Aires.'\n      ]\n    }\n  ],\n  skills: {\n    idiomas: 'English (B2)',\n    languages: 'Python, TypeScript, Java, SQL, JavaScript',\n    backend_databases: 'Django, Flask, Spring Boot, Supabase, PostgreSQL, MySQL',\n    frontend: 'Angular, React, Tailwind CSS, HTML5/CSS3',\n    devops_tools: 'Docker, Git, Linux/Bash, AWS, Cypress'\n  }\n};\n\nreturn {\n  json: {\n    master_cv_es: master_cv_es,\n    master_cv_en: master_cv_en\n  }\n};"
+      },
+      "name": "Unificar CV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        300
+      ]
+    },
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=AQ.Ab8RN6JALdg3PN6-t0hlwP2IytcDCE0eaajnL2QpNDTim7RpbA",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [\n    {\n      parts: [\n        {\n          text: `Eres un experto en optimización de CVs para sistemas ATS. Tu tarea es adaptar el Master CV al puesto especificado siguiendo ESTRICTAMENTE las siguientes reglas:\n\nREGLA 1 - IDIOMA Y SELECCIÓN DE MASTER CV:\nDetecta automáticamente el idioma de la oferta de trabajo (Job Description).\n- Si la oferta está en inglés, DEBES usar el \\\"master_cv_en\\\" y redactar todo el CV resultante en INGLÉS.\n- Si la oferta está en español, DEBES usar el \\\"master_cv_es\\\" y redactar todo en ESPAÑOL.\nNo mezcles idiomas. Adapta también los encabezados de las secciones (ej. \\\"Professional Profile\\\" vs \\\"Perfil Profesional\\\").\n\nREGLA 2 - RESERVACIÓN ABSOLUTA DE IDENTIDAD Y ESTRUCTURA (CERO ALUCINACIÓN):\nTu nombre completo es Ezequiel Enrico Areco y tus datos de contacto deben quedar intactos.\nPROHIBIDO inventar, modificar o agregar fechas, empresas, cargos o títulos educativos. La estructura base del historial laboral y educativo debe mantenerse idéntica.\n\nREGLA 3 - SKILL SWAPPING INTELIGENTE (REEMPLAZO ESTRATÉGICO):\nReemplaza las tecnologías del Master CV por las que requiere la oferta SÓLO si es estrictamente necesario para el ATS (ej. cambiar \\\"Angular\\\" por \\\"React\\\" o \\\"Node.js\\\").\nREGLA DE ORO: Si la oferta laboral da opciones (ej. \\\"SQL Server, PostgreSQL o MySQL\\\") y el Master CV ya menciona una de ellas (ej. MySQL o PostgreSQL), MANTÉN la tecnología original. No reescribas la historia si ya se cumple el requisito.\nIntegra herramientas transversales solicitadas (ej. Git, Scrum, metodologías ágiles) de forma natural en los \\\"bullet points\\\" de las experiencias.\n\nREGLA 4 - CONSERVACIÓN DE COMPLEJIDAD TÉCNICA (NO SIMPLIFICAR):\nMantén intactos los conceptos arquitectónicos y de ingeniería del Master CV (ej. \\\"arquitectura offline-first\\\", \\\"sincronización asíncrona\\\", \\\"arquitectura RAG\\\", \\\"tiempo real\\\").\nIntegra las palabras clave de la oferta laboral enriqueciendo estas descripciones, NO reemplazándolas por frases genéricas.\n\nREGLA 5 - LONGITUD Y OPTIMIZACIÓN DEL ESPACIO (1 SOLA PÁGINA) Y SIN SENIORITY:\nEl CV final DEBE caber en exactamente 1 sola página. Intenta utilizar casi el total de la página aportando los datos más importantes y destacables para que quede un currículum muy profesional, robusto y atractivo, pero NUNCA excediendo 1 página.\nIMPORTANTE: NUNCA incluyas nivel de seniority (ej. \\\"junior\\\", \\\"semi-senior\\\", etc.) en el resumen del perfil ni en ningún otro lado. Redacta el resumen como \\\"Profesional en tecnología y sistemas...\\\" o \\\"Software Developer...\\\", dejando que el reclutador determine el seniority.\n\nFORMATO DE SALIDA OBLIGATORIO:\nDevuelve ÚNICAMENTE un objeto JSON válido con exactamente estas claves. Sin texto adicional, sin bloques markdown:\n{\n  \"idioma\": \"[es o en]\",\n  \"seccion_perfil\": \"[Perfil Profesional o Professional Profile]\",\n  \"seccion_experiencia\": \"[Experiencia Profesional o Professional Experience]\",\n  \"seccion_educacion\": \"[Educación y Certificaciones o Education and Certifications]\",\n  \"seccion_habilidades\": \"[Habilidades Técnicas o Technical Skills]\",\n  \"titulo_adaptado\": \"[El título exacto que pide la oferta]\",\n  \"resumen_perfil\": \"[Párrafo de 3 a 5 líneas MÁXIMO, contundente, con palabras clave de la oferta y SIN MENCIONAR EL SENIORITY. Exprime el espacio para destacar]\",\n  \"experiencias_html\": \"[HTML puro con las experiencias. Estructura: <div class='experience-item'><div class='experience-header'><span>EMPRESA</span><span>FECHA</span></div><div class='experience-subheader'><span>PUESTO ADAPTADO</span></div><ul><li>bullet 1</li></ul></div>]\",\n  \"educacion_html\": \"[HTML puro con la educación. Estructura: <div class='education-item'><div class='education-header'><span>TÍTULO</span><span>INSTITUCIÓN | AÑO</span></div><div class='education-subheader'>Detalles relevantes</div></div>]\",\n  \"skills_html\": \"[Lista de tecnologías separadas por comas, con Skill Swapping aplicado. Formato: <strong>Categoría:</strong> Tech1, Tech2 | <strong>Categoría2:</strong> Tech3, Tech4]\"\n}\n\nRequisitos del Puesto:\n${JSON.stringify($('IA - Analista RRHH').item.json.candidates[0].content.parts[0].text)}\n\nMaster CV Español:\n${JSON.stringify($json.master_cv_es)}\n\nMaster CV Inglés:\n${JSON.stringify($json.master_cv_en)}`\n        }\n      ]\n    }\n  ],\n  generationConfig: {\n    responseMimeType: \"application/json\"\n  }\n}) }}",
+        "options": {}
+      },
+      "name": "IA - Matchmaker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        800,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 65000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Leemos el template HTML hardcodeado\nlet template = `<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>CV - {{nombre_completo}} | {{titulo_adaptado}}</title>\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400&display=swap');\n        @page { size: A4; margin: 1.5cm; }\n        * { box-sizing: border-box; margin: 0; padding: 0; }\n        body { font-family: 'Montserrat', sans-serif; font-size: 10.5pt; line-height: 1.4; color: #111; background-color: #fff; }\n        h1 { font-size: 20pt; text-align: center; font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }\n        .contact-info { text-align: center; font-size: 9.5pt; margin-bottom: 15px; color: #444; }\n        .contact-info a { color: #0056b3; text-decoration: none; }\n        h2 { font-size: 12pt; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #000; margin-top: 12px; margin-bottom: 8px; padding-bottom: 2px; color: #222; }\n        .experience-item { margin-bottom: 12px; }\n        .experience-header, .experience-subheader { display: flex; justify-content: space-between; align-items: baseline; }\n        .experience-header { font-weight: 700; }\n        .experience-subheader { font-style: italic; margin-bottom: 3px; font-weight: 600; color: #444; }\n        ul { list-style-type: disc; padding-left: 18px; }\n        li { margin-bottom: 3px; }\n        .education-item { margin-bottom: 8px; }\n        .education-header { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; }\n        .education-subheader { font-style: italic; font-size: 9.5pt; color: #555; }\n        .skills-section p { margin-bottom: 3px; line-height: 1.5; }\n    </style>\n</head>\n<body>\n    <h1>{{nombre_completo}}</h1>\n    <div class=\"contact-info\">\n        {{ciudad}} | <a href=\"mailto:{{email}}\">{{email}}</a> | <a href=\"{{linkedin_url}}\">LinkedIn</a> | <a href=\"{{github_url}}\">GitHub</a>\n    </div>\n    <h2>{{seccion_perfil}}</h2>\n    <p>{{resumen_perfil}}</p>\n    <h2>{{seccion_experiencia}}</h2>\n    {{experiencias_html}}\n    <h2>{{seccion_educacion}}</h2>\n    {{educacion_html}}\n    <h2>{{seccion_habilidades}}</h2>\n    <div class=\"skills-section\">\n        <p>{{skills_html}}</p>\n    </div>\n</body>\n</html>`;\n\n// Parsear respuesta de la IA\nconst rawAiResponse = $input.item.json.candidates[0].content.parts[0].text;\nconst cvData = JSON.parse(rawAiResponse);\n\n// Datos personales desde el primer nodo (Webhook body) o fallback hardcodeado\nconst persona = {\n  nombre_completo: 'Ezequiel Enrico Areco',\n  ciudad: 'Buenos Aires, Argentina',\n  email: 'EzequielEnrico15@gmail.com',\n  telefono: '+54 11 1234-5678',\n  linkedin_url: 'https://www.linkedin.com/in/ezequiel-enrico/',\n  github_url: 'https://github.com/arecofix'\n};\n\n// Reemplazar placeholders dinámicos (contenido de la IA y traducciones)\ntemplate = template.replace('{{titulo_adaptado}}', cvData.titulo_adaptado || '');\ntemplate = template.replace('{{resumen_perfil}}', cvData.resumen_perfil || '');\ntemplate = template.replace('{{experiencias_html}}', cvData.experiencias_html || '');\ntemplate = template.replace('{{educacion_html}}', cvData.educacion_html || '');\ntemplate = template.replace('{{skills_html}}', cvData.skills_html || '');\ntemplate = template.replace('{{seccion_perfil}}', cvData.seccion_perfil || 'Perfil Profesional');\ntemplate = template.replace('{{seccion_experiencia}}', cvData.seccion_experiencia || 'Experiencia Profesional');\ntemplate = template.replace('{{seccion_educacion}}', cvData.seccion_educacion || 'Educación y Certificaciones');\ntemplate = template.replace('{{seccion_habilidades}}', cvData.seccion_habilidades || 'Habilidades Técnicas');\n\n// Reemplazar los datos personales\ntemplate = template.replace(/{{nombre_completo}}/g, persona.nombre_completo);\ntemplate = template.replace(/{{ciudad}}/g, persona.ciudad);\ntemplate = template.replace(/{{email}}/g, persona.email);\ntemplate = template.replace(/{{telefono}}/g, persona.telefono);\ntemplate = template.replace(/{{linkedin_url}}/g, persona.linkedin_url);\ntemplate = template.replace(/{{github_url}}/g, persona.github_url);\n\nconst buffer = Buffer.from(template, 'utf-8');\nconst tituloSlug = (cvData.titulo_adaptado || 'CV').replace(/\\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');\n\nreturn {\n  json: {\n    html_final: template,\n    file_name: `CV_Ezequiel_${tituloSlug}.pdf`\n  },\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'index.html'\n    }\n  }\n};"
+      },
+      "name": "Ensamblaje HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Gotenberg PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst fileName = $('Ensamblaje HTML').item.json.file_name || 'CV_Ezequiel.pdf';\n\nreturn {\n  json: {\n    url_pdf: `data:application/pdf;base64,${buffer.toString('base64')}`,\n    file_name: fileName\n  }\n};"
+      },
+      "name": "Final Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "IA - Analista RRHH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA - Analista RRHH": {
+      "main": [
+        [
+          {
+            "node": "Supabase Experiencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Experiencia": {
+      "main": [
+        [
+          {
+            "node": "Supabase Educacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Educacion": {
+      "main": [
+        [
+          {
+            "node": "Unificar CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificar CV": {
+      "main": [
+        [
+          {
+            "node": "IA - Matchmaker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA - Matchmaker": {
+      "main": [
+        [
+          {
+            "node": "Ensamblaje HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensamblaje HTML": {
+      "main": [
+        [
+          {
+            "node": "Gotenberg PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gotenberg PDF": {
+      "main": [
+        [
+          {
+            "node": "Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
