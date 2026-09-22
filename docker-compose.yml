@@ -19,11 +19,11 @@ services:
     ports:
       - "5678:5678"
     environment:
-      - N8N_HOST=n8n.local
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
+      - N8N_HOST=n8n.arecofix.com.ar
+      - N8N_PORT=443
+      - N8N_PROTOCOL=https
       - NODE_ENV=production
-      - WEBHOOK_URL=https://<tu-dominio-n8n>/
+      - WEBHOOK_URL=https://n8n.arecofix.com.ar
       - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
     volumes:
       - n8n_data:/home/node/.n8n

@@ -1,15 +1,17 @@
 const fs = require('fs');
+
+// 1. Lee el archivo local
 const data = JSON.parse(fs.readFileSync('/home/ubuntu/master_cv.json', 'utf8')).experiencia_laboral;
-fetch('http://localhost:8000/rest/v1/experiencia_laboral', {
+
+// 2. Envía los datos directamente al Webhook de tu n8n
+fetch('https://n8n.arecofix.com.ar/webhook-test/cv-generator', {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json',
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA',
-        'Prefer': 'return=representation'
+        'Content-Type': 'application/json'
+        // Se eliminaron las contraseñas de Supabase porque n8n no las necesita
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify({ experiencia_laboral: data })
 })
-.then(res => res.json())
-.then(console.log)
-.catch(console.error);
+    .then(res => res.text())
+    .then(console.log)
+    .catch(console.error);

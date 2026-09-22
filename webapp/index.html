@@ -1,26 +1,158 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV Generator | Anti-ATS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
             color: #f8fafc;
             background-image: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
+
         .glass-panel {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 48rem;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
         }
-        /* Spinner */
+
+        .decoration-top,
+        .decoration-bottom {
+            position: absolute;
+            width: 12rem;
+            height: 12rem;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .decoration-top {
+            top: -6rem;
+            right: -6rem;
+            background: #3b82f6;
+        }
+
+        .decoration-bottom {
+            bottom: -6rem;
+            left: -6rem;
+            background: #a855f7;
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .field {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #475569;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: #e2e8f0;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        textarea {
+            resize: none;
+            min-height: 10rem;
+        }
+
+        button {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+
+        button:hover:not(:disabled) {
+            background: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .spinner {
             border: 3px solid rgba(255, 255, 255, 0.1);
             border-left-color: #3b82f6;
@@ -28,74 +160,282 @@
             width: 24px;
             height: 24px;
             animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .state {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .state.visible {
+            display: block;
+        }
+
+        .state-loading {
+            color: #94a3b8;
+        }
+
+        .state-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .state-success h3 {
+            color: #4ade80;
+            margin-bottom: 0.5rem;
+        }
+
+        .state-success p {
+            color: #cbd5e1;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .state-success a {
+            display: inline-block;
+            background: #1e293b;
+            color: white;
+            text-decoration: none;
+            padding: 0.625rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #475569;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .state-success a:hover {
+            background: #334155;
+        }
+
+        .state-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .state-error h3 {
+            color: #f87171;
+            margin-bottom: 0.5rem;
+        }
+
+        .state-error p {
+            color: #cbd5e1;
+            font-size: 0.875rem;
+        }
+
+        .retry-info {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 sm:p-8">
 
-    <main class="w-full max-w-3xl glass-panel rounded-2xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
-        <!-- Decoration -->
-        <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+<body>
+    <main class="glass-panel">
+        <div class="decoration-top"></div>
+        <div class="decoration-bottom"></div>
 
-        <div class="relative z-10">
-            <header class="mb-8 text-center">
-                <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Anti-ATS CV Generator</h1>
-                <p class="text-slate-400 text-sm sm:text-base">Pega la descripción del trabajo (JD) y deja que la IA forje el CV perfecto basado en tu Master CV.</p>
+        <div class="content">
+            <header>
+                <h1>Anti-ATS CV Generator</h1>
+                <p>Pega la descripción del trabajo (JD) y deja que la IA forje el CV perfecto basado en tu Master CV.
+                </p>
             </header>
 
-            <form id="cvForm" class="space-y-6">
-                <div>
-                    <label for="jobTitle" class="block text-sm font-medium text-slate-300 mb-2">Título del Puesto</label>
+            <form id="cvForm" novalidate>
+                <div class="field">
+                    <label for="jobTitle">Título del Puesto</label>
                     <input type="text" id="jobTitle" name="jobTitle" required
-                        class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         placeholder="Ej: Senior Full Stack Engineer">
                 </div>
 
-                <div>
-                    <label for="jobDescription" class="block text-sm font-medium text-slate-300 mb-2">Job Description (JD)</label>
-                    <textarea id="jobDescription" name="jobDescription" rows="8" required
-                        class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                <div class="field">
+                    <label for="jobDescription">Job Description (JD)</label>
+                    <textarea id="jobDescription" name="jobDescription" required
                         placeholder="Pega aquí los requerimientos técnicos y responsabilidades del puesto..."></textarea>
                 </div>
 
-                <div class="pt-2">
-                    <button type="submit" id="submitBtn"
-                        class="w-full relative group bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-blue-500/30 transition-all duration-200 flex justify-center items-center gap-2">
-                        <span>Generar CV Optimizado</span>
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </button>
-                </div>
+                <button type="submit" id="submitBtn">
+                    <span id="btnText">Generar CV Optimizado</span>
+                    <svg id="btnIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </button>
             </form>
 
-            <!-- Loading State -->
-            <div id="loadingState" class="hidden mt-8 flex flex-col items-center justify-center space-y-4 py-8">
+            <div id="loadingState" class="state state-loading">
                 <div class="spinner"></div>
-                <p class="text-slate-400 text-sm animate-pulse">Analizando JD y cruzando datos con Master CV...</p>
+                <p id="loadingMsg">Analizando JD y cruzando datos con Master CV...</p>
             </div>
 
-            <!-- Result State -->
-            <div id="resultState" class="hidden mt-8 p-6 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
-                <div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <h3 class="text-xl font-semibold text-green-400 mb-2">¡CV Generado con Éxito!</h3>
-                <p class="text-slate-300 mb-6 text-sm">Tu currículum ha sido optimizado y empaquetado en formato PDF Harvard.</p>
-                <a id="downloadLink" href="#" download="CV_Optimizado.pdf"
-                    class="inline-block bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    Descargar PDF
-                </a>
+            <div id="resultState" class="state state-success">
+                <h3>¡CV Generado con Éxito!</h3>
+                <p>Tu currículum ha sido optimizado y empaquetado en formato PDF.</p>
+                <a id="downloadLink" href="#" download="CV_Optimizado.pdf">Descargar PDF</a>
             </div>
-            
-            <!-- Error State -->
-            <div id="errorState" class="hidden mt-8 p-6 bg-red-500/10 border border-red-500/20 rounded-xl text-center">
-                <h3 class="text-lg font-semibold text-red-400 mb-2">Ocurrió un error</h3>
-                <p id="errorMsg" class="text-slate-300 text-sm">No se pudo contactar con el webhook.</p>
+
+            <div id="errorState" class="state state-error">
+                <h3>Ocurrió un error</h3>
+                <p id="errorMsg">No se pudo contactar con el webhook.</p>
+                <p class="retry-info" id="retryInfo"></p>
             </div>
         </div>
     </main>
 
-    <script src="script.js"></script>
+    <script>
+        // ============ CONFIG ============
+        const WEBHOOK_URL = 'https://n8n.arecofix.com.ar/webhook/cv-generator';
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY_MS = 2000;   // backoff exponencial: 2s, 4s, 8s
+        const TIMEOUT_MS = 180000;     // 3 minutos
+
+        // ============ DOM ============
+        const form = document.getElementById('cvForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const loadingState = document.getElementById('loadingState');
+        const loadingMsg = document.getElementById('loadingMsg');
+        const resultState = document.getElementById('resultState');
+        const errorState = document.getElementById('errorState');
+        const errorMsg = document.getElementById('errorMsg');
+        const retryInfo = document.getElementById('retryInfo');
+        const downloadLink = document.getElementById('downloadLink');
+
+        // ============ HELPERS ============
+        function setState(state, message) {
+            loadingState.classList.remove('visible');
+            resultState.classList.remove('visible');
+            errorState.classList.remove('visible');
+
+            if (state === 'loading') {
+                loadingMsg.textContent = message || 'Analizando JD y cruzando datos con Master CV...';
+                loadingState.classList.add('visible');
+                submitBtn.disabled = true;
+                btnText.textContent = 'Generando...';
+            } else if (state === 'success') {
+                resultState.classList.add('visible');
+                submitBtn.disabled = false;
+                btnText.textContent = 'Generar CV Optimizado';
+                btnIcon.style.display = '';
+            } else if (state === 'error') {
+                errorMsg.textContent = message || 'No se pudo contactar con el webhook.';
+                errorState.classList.add('visible');
+                submitBtn.disabled = false;
+                btnText.textContent = 'Reintentar';
+                btnIcon.style.display = '';
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ============ FETCH CON RETRY + TIMEOUT ============
+        async function fetchWithRetry(url, options, attempt = 1) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal,
+                    // Forzar HTTP/2 evitando QUIC cuando el navegador lo soporte
+                    cache: 'no-store',
+                    keepalive: false
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (err) {
+                clearTimeout(timeoutId);
+                const isNetworkError = err.name === 'TypeError' || err.name === 'AbortError';
+                const isQuicError = String(err.message).includes('QUIC') || String(err.message).includes('Failed to fetch');
+
+                if (attempt < MAX_RETRIES && (isNetworkError || isQuicError)) {
+                    const delay = RETRY_DELAY_MS * Math.pow(2, attempt - 1);
+                    retryInfo.textContent = `Reintentando (${attempt}/${MAX_RETRIES - 1}) en ${delay / 1000}s...`;
+                    console.warn(`⚠️ Intento ${attempt} falló. Reintentando en ${delay}ms...`, err);
+                    await sleep(delay);
+                    return fetchWithRetry(url, options, attempt + 1);
+                }
+                throw err;
+            }
+        }
+
+        // ============ SUBMIT ============
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const jobTitle = document.getElementById('jobTitle').value.trim();
+            const jobDescription = document.getElementById('jobDescription').value.trim();
+
+            if (!jobDescription) {
+                setState('error', 'La descripción del puesto (JD) no puede estar vacía.');
+                return;
+            }
+
+            // Combinamos título + JD como un solo campo (así lo espera el prompt de n8n)
+            const fullJD = jobTitle
+                ? `Título: ${jobTitle}\n\nJD:\n${jobDescription}`
+                : jobDescription;
+
+            setState('loading');
+            retryInfo.textContent = '';
+
+            try {
+                const response = await fetchWithRetry(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ job_description: fullJD })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Respuesta del webhook:', data);
+
+                if (!data.success || !data.url_pdf) {
+                    throw new Error('La respuesta del servidor no contiene el PDF esperado.');
+                }
+
+                // Actualizamos el link de descarga con el nombre real del archivo
+                downloadLink.href = data.url_pdf;
+                downloadLink.download = data.file_name || 'CV_Optimizado.pdf';
+                downloadLink.textContent = `Descargar ${data.file_name || 'PDF'}`;
+
+                setState('success');
+            } catch (err) {
+                console.error('❌ Error final:', err);
+                let msg = 'No se pudo generar el CV. ';
+                if (err.name === 'AbortError') {
+                    msg += 'La operación tardó más de 3 minutos. Intentá de nuevo.';
+                } else if (String(err.message).includes('Failed to fetch') || String(err.message).includes('QUIC')) {
+                    msg += 'Error de red. Verificá tu conexión o desactivá QUIC en el navegador (chrome://flags/#enable-quic).';
+                } else {
+                    msg += err.message;
+                }
+                setState('error', msg);
+            }
+        });
+    </script>
 </body>
+
 </html>

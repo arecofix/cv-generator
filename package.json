@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "pnpm": "^12.5.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "pnpm"
+    ]
+  }
+}

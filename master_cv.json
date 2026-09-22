@@ -1,100 +1,106 @@
 {
   "datos_personales": {
-    "nombre_completo": "Ezequiel Enrico",
-    "ciudad": "Buenos Aires, Argentina",
-    "email": "ezequiel@arecofix.com.ar",
-    "telefono": "+54 11 1234-5678",
+    "nombre_completo": "Ezequiel Enrico Areco",
+    "ciudad": "Marcos Paz, Buenos Aires, Argentina",
+    "email": "ezequielenrico15@gmail.com",
+    "telefono": "+54 11 25960900",
     "linkedin_url": "https://linkedin.com/in/ezequiel-areco",
-    "github_url": "https://github.com/ezequiel-areco",
-    "portfolio_url": "https://arecofix.com.ar"
+    "github_url": "https://github.com/arecofix",
+    "portfolio_url": "https://portfolio.arecofix.com.ar"
   },
   "experiencia_laboral": [
     {
-      "empresa": "Arecofix",
-      "puesto_base": "Full-Stack Developer",
-      "fecha_inicio": "2024-01-01",
-      "fecha_fin": null,
-      "bullet_points": [
-        "Desarrollo de aplicación multiplataforma para gestión de stock utilizando Angular y Tauri.",
-        "Implementación de arquitectura de alta disponibilidad (failover) con Cloudflare D1, Workers e IndexedDB.",
-        "Despliegue de backend autoalojado con Supabase y PostgreSQL en entorno Docker sobre VPS de Oracle Cloud.",
-        "Integración de modelos de IA (Gemini Pro, RAG) para procesamiento de datos."
-      ],
-      "tags": ["Angular", "Tauri", "Supabase", "Docker", "Cloudflare", "Node.js", "TypeScript"]
-    },
-    {
-      "empresa": "Independiente (Zarx, Arecofix)",
-      "puesto_base": "Desarrollador de Software Independiente / Proyectos Destacados",
+      "empresa": "Proyectos Destacados (Arecofix, Zarx)",
+      "puesto_base": "Desarrollador de Software Full-Stack",
       "fecha_inicio": "2020-01-01",
-      "fecha_fin": null,
+      "fecha_fin": "Actualidad",
       "bullet_points": [
-        "Diseño y desarrollo end-to-end de soluciones web y móviles (Zarx, Arecofix) utilizando Angular, Python y Supabase.",
-        "Implementación de automatizaciones, scripts de auditoría y creación de un chat institucional en tiempo real integrando inteligencia artificial mediante arquitectura RAG (Retrieval-Augmented Generation)."
+        "Desarrollo y despliegue end-to-end de soluciones web y móviles multiplataforma utilizando Angular, Python, Tauri y Supabase.",
+        "Arecofix: Implementación de un sistema de gestión de stock con arquitectura offline-first, sincronización asíncrona y alta disponibilidad (failover) con Cloudflare D1, Workers e IndexedDB.",
+        "Zarx (App de monitoreo): Diseño del modelo relacional y optimización de la concurrencia mediante conexiones en tiempo real.",
+        "Despliegue de backend autoalojado con Supabase y PostgreSQL en entorno Docker sobre VPS de Oracle Cloud, e integración de IA (Gemini Pro, arquitectura RAG) para procesamiento de datos."
       ],
-      "tags": ["Angular", "Python", "Supabase", "IA", "RAG", "Automatización", "Desarrollo Web", "Desarrollo Móvil"]
-    },
-    {
-      "empresa": "Municipio de Marcos Paz",
-      "puesto_base": "Equipo Tecnico Reparación de artículos electrónicos y soluciones en informática",
-      "fecha_inicio": "2022-01-01",
-      "fecha_fin": "2024-01-01",
-      "bullet_points": [
-        "Diseño e implementación de un sistema digital de registro para el programa Envión en Python (Django) y PostgreSQL, reduciendo errores administrativos en un 30%.",
-        "Desarrollo de APIs RESTful para la integración de sistemas internos e implementación de infraestructura en la nube (AWS), optimizando la escalabilidad de las plataformas.",
-        "Capacitación tecnológica: Dictado de talleres técnicos y de informática para más de 50 beneficiarios."
-      ],
-      "tags": ["Python", "Django", "PostgreSQL", "APIs RESTful", "AWS", "Hardware", "Capacitación"]
+      "tags": [
+        "Angular",
+        "Python",
+        "Supabase",
+        "Tauri",
+        "Docker",
+        "Cloudflare",
+        "IA",
+        "RAG",
+        "PostgreSQL"
+      ]
     },
     {
       "empresa": "IAP (Marcos Paz) / Eddis Educativa (Merlo)",
       "puesto_base": "Profesor de Reparación de Celulares y Electrónica",
       "fecha_inicio": "2024-01-01",
-      "fecha_fin": null,
+      "fecha_fin": "Actualidad",
       "bullet_points": [
-        "Dictado de talleres técnicos enfocados en diagnóstico de hardware, lógica de microcircuitos y resolución estructurada de problemas."
+        "Dictado de talleres técnicos avanzados enfocados en diagnóstico, reparación y microsoldadura de equipos electrónicos.",
+        "Capacitación en mantenimiento de hardware, lectura de diagramas, uso de instrumentos de medición y resolución estructurada de fallas.",
+        "Fomento de buenas prácticas en servicio técnico y trato al cliente."
       ],
-      "tags": ["Hardware", "Microcircuitos", "Electrónica", "Docencia", "Resolución de problemas"]
+      "tags": [
+        "Hardware",
+        "Microcircuitos",
+        "Electrónica",
+        "Microsoldadura",
+        "Docencia"
+      ]
+    },
+    {
+      "empresa": "Municipio de Marcos Paz",
+      "puesto_base": "Equipo Técnico Reparación de artículos electrónicos y soluciones en informática",
+      "fecha_inicio": "2022-01-01",
+      "fecha_fin": "2024-01-01",
+      "bullet_points": [
+        "Mantenimiento y gestión integral de la plataforma web del programa Envión (PHP, MySQL), administrando de forma centralizada las bases de datos de los beneficiarios.",
+        "Optimización del control de asistencia y análisis de métricas mediante Excel, logrando reducir significativamente los errores administrativos.",
+        "Trabajo de campo complementario: entrevistas de admisión y seguimiento territorial activo para asegurar la retención de usuarios."
+      ],
+      "tags": [
+        "PHP",
+        "MySQL",
+        "Excel",
+        "Hardware",
+        "Soporte Técnico"
+      ]
     }
   ],
-  "educacion_y_skills": [
+  "educacion": [
     {
-      "tipo": "educacion",
       "titulo": "Licenciatura en Informática",
       "institucion": "Universidad Nacional del Oeste",
-      "detalles": {
-        "fecha_inicio": "2022-01-01",
-        "proyectos": "Sitio web institucional con integración de comercio electrónico con Administración de Stock Mediante sistema CRUD Realizado con: Laravel, MySQL, Docker, Tailwind, Utilizando Linux / Bash"
-      }
+      "fecha_inicio": "2023",
+      "fecha_fin": "Actualidad",
+      "detalles": [
+        "Proyecto Destacado: Creación de un chat institucional en tiempo real integrando inteligencia artificial mediante arquitectura RAG. Desarrollo implementado con Python y conexiones mediante Supabase."
+      ]
     },
     {
-      "tipo": "educacion",
-      "titulo": "Programación en Python",
-      "institucion": "Argentina Programa",
-      "detalles": {
-        "fechas": "2021-2022",
-        "promedio": "8,40",
-        "proyectos": "Portfolio Personal desarrollado en Framework Django"
-      }
-    },
-    {
-      "tipo": "skill",
-      "titulo": "Stack Tecnológico",
-      "institucion": "Múltiples",
-      "detalles": {
-        "languages": ["Python", "TypeScript", "Java", "SQL", "JavaScript"],
-        "backend_and_databases": ["Django", "Flask", "Spring Boot", "Supabase", "PostgreSQL", "MySQL"],
-        "frontend": ["Angular", "React", "Tailwind CSS", "HTML5/CSS3"],
-        "devops_and_tools": ["Docker", "Git", "Linux/Bash", "AWS", "Cypress"]
-      }
-    },
-    {
-      "tipo": "certificacion",
-      "titulo": "Certificaciones y Extras",
-      "institucion": "Múltiples",
-      "detalles": {
-        "idiomas": "Inglés (B2)",
-        "certificados": ["Fundamentos de bases de datos (Ciudad de Buenos Aires)", "Instalación Eléctrica Domiciliaria"]
-      }
+      "titulo": "Tecnicatura superior en análisis de sistemas",
+      "institucion": "Instituto superior de formación técnica N 177",
+      "fecha_inicio": "2020",
+      "fecha_fin": "2023",
+      "detalles": [
+        "Proyecto: Academia virtual desarrollada en Python con Framework Django y conexión SQLite.",
+        "Proyecto: Sistema de gestión desarrollado en Java con metodología de Programación Orientada a Objetos."
+      ]
     }
-  ]
+  ],
+  "certificaciones": [
+    "Certificado de Programación en Python (Argentina Programa)",
+    "Certificado en Fundamentos de bases de datos (Ciudad de Buenos Aires)",
+    "Certificado en Instalación Eléctrica Domiciliaria",
+    "Registro de conducir"
+  ],
+  "skills": {
+    "idiomas": "Inglés (B2) | Español (Nativo)",
+    "languages": "Python, TypeScript, Java, SQL, JavaScript",
+    "backend_databases": "Django, Flask, Spring Boot, Supabase, PostgreSQL, MySQL",
+    "frontend": "Angular, React, Tailwind CSS, HTML5/CSS3",
+    "devops_tools": "Docker, Git, Linux/Bash, AWS, Cypress, Cloudflare"
+  }
 }
