@@ -6,5 +6,12 @@
     "onlyBuiltDependencies": [
       "pnpm"
     ]
+  },
+  "devDependencies": {
+    "wrangler": "^4.138.0"
+  },
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   }
 }
