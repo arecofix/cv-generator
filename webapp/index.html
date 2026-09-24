@@ -242,6 +242,50 @@
             color: #94a3b8;
             font-style: italic;
         }
+
+        /* Profile Button & Modal */
+        .profile-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: #e2e8f0;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            z-index: 20;
+        }
+        .profile-btn:hover {
+            background: #334155;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.8);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.visible {
+            display: flex;
+        }
+        .close-btn {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover { color: white; }
     </style>
 </head>
 
@@ -249,6 +293,8 @@
     <main class="glass-panel">
         <div class="decoration-top"></div>
         <div class="decoration-bottom"></div>
+
+        <button class="profile-btn" id="openProfileBtn">👤 Mi Perfil</button>
 
         <div class="content">
             <header>
@@ -296,6 +342,29 @@
                 <p class="retry-info" id="retryInfo"></p>
             </div>
         </div>
+
+        <!-- Profile Modal -->
+        <div id="profileModal" class="modal">
+            <div class="glass-panel" style="max-width: 32rem; padding: 2rem;">
+                <span class="close-btn" id="closeProfileBtn">&times;</span>
+                <h2 style="margin-bottom: 1.5rem;">Datos del Perfil</h2>
+                <form id="profileForm">
+                    <div class="field">
+                        <label for="profileName">Nombre Completo</label>
+                        <input type="text" id="profileName" placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="field">
+                        <label for="profileEmail">Email</label>
+                        <input type="text" id="profileEmail" placeholder="Ej: juan@ejemplo.com">
+                    </div>
+                    <div class="field">
+                        <label for="profilePhone">Teléfono / LinkedIn</label>
+                        <input type="text" id="profilePhone" placeholder="Opcional">
+                    </div>
+                    <button type="submit">Guardar Perfil</button>
+                </form>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -317,6 +386,15 @@
         const errorMsg = document.getElementById('errorMsg');
         const retryInfo = document.getElementById('retryInfo');
         const downloadLink = document.getElementById('downloadLink');
+
+        // Modal Elements
+        const profileModal = document.getElementById('profileModal');
+        const openProfileBtn = document.getElementById('openProfileBtn');
+        const closeProfileBtn = document.getElementById('closeProfileBtn');
+        const profileForm = document.getElementById('profileForm');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profilePhone = document.getElementById('profilePhone');
 
         // ============ HELPERS ============
         function setState(state, message) {
@@ -378,6 +456,30 @@
             }
         }
 
+        // ============ PERFIL ============
+        function loadProfile() {
+            const profile = JSON.parse(localStorage.getItem('cv_profile') || '{}');
+            profileName.value = profile.name || '';
+            profileEmail.value = profile.email || '';
+            profilePhone.value = profile.phone || '';
+            return profile;
+        }
+        
+        loadProfile(); // Cargar al inicio
+
+        openProfileBtn.addEventListener('click', () => profileModal.classList.add('visible'));
+        closeProfileBtn.addEventListener('click', () => profileModal.classList.remove('visible'));
+        
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            localStorage.setItem('cv_profile', JSON.stringify({
+                name: profileName.value.trim(),
+                email: profileEmail.value.trim(),
+                phone: profilePhone.value.trim()
+            }));
+            profileModal.classList.remove('visible');
+        });
+
         // ============ SUBMIT ============
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -395,6 +497,8 @@
                 ? `Título: ${jobTitle}\n\nJD:\n${jobDescription}`
                 : jobDescription;
 
+            const userProfile = loadProfile();
+
             setState('loading');
             retryInfo.textContent = '';
 
@@ -402,7 +506,10 @@
                 const response = await fetchWithRetry(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ job_description: fullJD })
+                    body: JSON.stringify({ 
+                        job_description: fullJD,
+                        profile: userProfile
+                    })
                 });
 
                 if (!response.ok) {
