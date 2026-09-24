@@ -8,13 +8,21 @@ export class AuthService {
     }
 
     init() {
+        this.tryInitGoogle();
+    }
+
+    tryInitGoogle() {
+        if (this._googleInitialized) return true;
         if (window.google && window.google.accounts) {
             google.accounts.id.initialize({
                 client_id: CONFIG.GOOGLE_CLIENT_ID,
                 callback: this.handleCredentialResponse.bind(this)
             });
+            this._googleInitialized = true;
+            return true;
         } else {
-            console.warn("Google Accounts script not loaded");
+            console.warn("Google Accounts script not loaded yet");
+            return false;
         }
     }
 
@@ -47,8 +55,11 @@ export class AuthService {
     }
 
     signIn() {
-        if (window.google && window.google.accounts) {
+        if (this.tryInitGoogle()) {
             google.accounts.id.prompt();
+        } else {
+            console.error("Google accounts library not loaded yet.");
+            alert("El servicio de Google aún se está cargando. Por favor, intenta de nuevo en unos segundos.");
         }
     }
 
