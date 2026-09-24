@@ -6,7 +6,6 @@
     "enabled": true
   },
   "assets": {
-    "directory": "webapp",
-    "binding": "ASSETS"
+    "directory": "webapp"
   }
 }
