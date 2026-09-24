@@ -8,6 +8,8 @@
     ]
   },
   "devDependencies": {
+    "cypress": "^16.1.0",
+    "http-server": "^14.1.1",
     "wrangler": "^4.138.0"
   },
   "scripts": {
