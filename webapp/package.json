@@ -17,5 +17,8 @@
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
     "tailwindcss": "^4.3.3"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^6.3.289"
   }
 }
