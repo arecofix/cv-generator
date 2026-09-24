@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV Generator | Anti-ATS</title>
+    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -438,9 +439,9 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="lib/pdf.min.js"></script>
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'lib/pdf.worker.min.js';
         
         // CONFIG
         const WEBHOOK_URL = 'https://n8n.arecofix.com.ar/webhook/cv-generator';
