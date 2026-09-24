@@ -385,7 +385,7 @@
                         Autocompletar con Google
                     </button>
                     <button type="button" class="btn-secondary" onclick="document.getElementById('cvUpload').click()">📄 Subir CV Existente (PDF/Word)</button>
-                    <input type="file" id="cvUpload" style="display:none" accept=".pdf,.doc,.docx" onchange="alert('El parser de CVs en el backend está en desarrollo. Por favor llena los datos manualmente.')">
+                    <input type="file" id="cvUpload" style="display:none" accept=".pdf" onchange="parseCV(this)">
                 </div>
 
                 <form id="profileForm">
@@ -438,7 +438,10 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
         // CONFIG
         const WEBHOOK_URL = 'https://n8n.arecofix.com.ar/webhook/cv-generator';
         let profileData = { experiences: [], educations: [] };
@@ -610,6 +613,65 @@
                 document.getElementById('generatorForm').style.display = 'block';
             }
         });
+
+        // ==========================================
+        // LOCAL CV PARSER (PDF.js + Regex)
+        // ==========================================
+        async function parseCV(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const btn = input.previousElementSibling;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Analizando PDF...';
+            btn.disabled = true;
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                let fullText = '';
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    const strings = content.items.map(item => item.str);
+                    fullText += strings.join(' ') + '\n';
+                }
+
+                // Regex Heuristics for basic info
+                const emailMatch = fullText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+                const phoneMatch = fullText.match(/(\+?\d{1,3}[-.\s]?)?(\(?\d{2,4}\)?[-.\s]?)?[\d]{3,4}[-.\s]?[\d]{3,4}/);
+                const linkedinMatch = fullText.match(/linkedin\.com\/in\/[^\s]+/i);
+                
+                // Populate Profile fields if empty
+                if (emailMatch) document.getElementById('p_email').value = emailMatch[0];
+                if (phoneMatch) document.getElementById('p_phone').value = phoneMatch[0];
+                if (linkedinMatch) document.getElementById('p_linkedin').value = 'https://' + linkedinMatch[0];
+                
+                // Name (heuristic: first few words of the document)
+                const firstWords = fullText.trim().split(/\s+/).slice(0, 3).join(' ');
+                if (!document.getElementById('p_name').value) {
+                    document.getElementById('p_name').value = firstWords;
+                }
+
+                // Add a dummy experience block indicating they should refine it
+                addExperience({
+                    company: "Extraído del CV",
+                    role: "Revisar",
+                    description: "Por favor revisa y corrige los datos extraídos del PDF. El parser automático mediante IA completa estará disponible pronto."
+                });
+                
+                alert('Análisis preliminar completado. Por favor revisa y corrige los campos.');
+                
+            } catch (err) {
+                console.error(err);
+                alert('Error al leer el PDF. Asegúrate de que no esté encriptado.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                input.value = '';
+            }
+        }
     </script>
 </body>
 </html>
