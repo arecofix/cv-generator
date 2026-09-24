@@ -26,26 +26,6 @@
               "parameterType": "formBinaryData",
               "name": "files",
               "inputDataFieldName": "data"
-            },
-            {
-              "name": "marginTop",
-              "value": "0.2",
-              "parameterType": "formStringData"
-            },
-            {
-              "name": "marginBottom",
-              "value": "0.2",
-              "parameterType": "formStringData"
-            },
-            {
-              "name": "marginLeft",
-              "value": "0.2",
-              "parameterType": "formStringData"
-            },
-            {
-              "name": "marginRight",
-              "value": "0.2",
-              "parameterType": "formStringData"
             }
           ]
         },
