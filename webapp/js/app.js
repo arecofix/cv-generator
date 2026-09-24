@@ -26,7 +26,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('closeProfileBtn').onclick = () => modal.classList.remove('visible');
     document.getElementById('cancelProfileBtn').onclick = () => modal.classList.remove('visible');
     
-    document.getElementById('googleAuthBtn').onclick = () => authService.signIn();
+    // Auth listeners
+    const googleBtn = document.getElementById('googleAuthBtn');
+    if(googleBtn) googleBtn.onclick = () => authService.signInWithGoogle();
+    
+    const loginBtn = document.getElementById('loginBtn');
+    if(loginBtn) loginBtn.onclick = () => {
+        const email = document.getElementById('authEmail').value;
+        const pass = document.getElementById('authPassword').value;
+        if(email && pass) authService.signInWithPassword(email, pass);
+        else alert('Por favor ingresa email y contraseña');
+    };
+
+    const registerBtn = document.getElementById('registerBtn');
+    if(registerBtn) registerBtn.onclick = () => {
+        const email = document.getElementById('authEmail').value;
+        const pass = document.getElementById('authPassword').value;
+        if(email && pass) authService.signUp(email, pass, email.split('@')[0]);
+        else alert('Por favor ingresa email y contraseña');
+    };
     
     document.getElementById('addExpBtn').onclick = () => addExperience();
     document.getElementById('addEduBtn').onclick = () => addEducation();
@@ -43,16 +61,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // -- UI Functions --
 
     function handleAuthChange(state) {
-        const googleBtn = document.getElementById('googleAuthBtn');
-        if (!googleBtn) return;
+        const authContainer = document.getElementById('authContainer');
+        if (!authContainer) return;
         
         if (state.isAuthenticated) {
-            googleBtn.innerHTML = `
-                <img src="${state.picture || ''}" style="width:20px; height:20px; border-radius:50%; margin-right:5px; object-fit:cover;">
-                Conectado como ${state.given_name || state.email.split('@')[0]}
-                <button type="button" id="signOutBtn" style="background:none; border:none; margin-left:10px; color:#ef4444; font-size:0.8rem; cursor:pointer;">(Cerrar Sesión)</button>
+            authContainer.innerHTML = `
+                <div style="background: rgba(15, 23, 42, 0.5); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        ${state.picture ? `<img src="${state.picture}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">` : ''}
+                        <span>Conectado como <strong>${state.name || state.email}</strong></span>
+                    </div>
+                    <button type="button" id="signOutBtn" class="btn-secondary" style="border-color: #ef4444; color: #ef4444;">Cerrar Sesión</button>
+                </div>
             `;
-            // Re-bind signout
             setTimeout(() => {
                 const soBtn = document.getElementById('signOutBtn');
                 if (soBtn) soBtn.onclick = (e) => { e.stopPropagation(); authService.signOut(); };
@@ -64,11 +85,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pName && !pName.value && state.name) pName.value = state.name;
             if (pEmail && !pEmail.value && state.email) pEmail.value = state.email;
         } else {
-            googleBtn.innerHTML = `
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                Autocompletar con Google
+            // Render manual login & google login form
+            authContainer.innerHTML = `
+                <div class="auth-box">
+                    <input type="email" id="authEmail" placeholder="Tu Email">
+                    <input type="password" id="authPassword" placeholder="Tu Contraseña">
+                    <div style="display:flex; gap:10px; margin-top: 10px;">
+                        <button type="button" class="btn-primary" id="loginBtn" style="flex:1">Iniciar Sesión</button>
+                        <button type="button" class="btn-secondary" id="registerBtn" style="flex:1">Registrarse</button>
+                    </div>
+                    <hr style="border-color: var(--border); margin: 15px 0;">
+                    <button type="button" class="btn-google" id="googleAuthBtn" style="width:100%; justify-content:center;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        Continuar con Google
+                    </button>
+                </div>
             `;
-            googleBtn.onclick = () => authService.signIn();
+            
+            // Re-bind listeners for newly created elements
+            document.getElementById('googleAuthBtn').onclick = () => authService.signInWithGoogle();
+            document.getElementById('loginBtn').onclick = () => {
+                const email = document.getElementById('authEmail').value;
+                const pass = document.getElementById('authPassword').value;
+                if(email && pass) authService.signInWithPassword(email, pass);
+                else alert('Por favor ingresa email y contraseña');
+            };
+            document.getElementById('registerBtn').onclick = () => {
+                const email = document.getElementById('authEmail').value;
+                const pass = document.getElementById('authPassword').value;
+                if(email && pass) authService.signUp(email, pass, email.split('@')[0]);
+                else alert('Por favor ingresa email y contraseña');
+            };
         }
         loadProfileToForm();
     }

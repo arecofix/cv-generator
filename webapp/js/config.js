@@ -1,4 +1,5 @@
 export const CONFIG = {
     WEBHOOK_URL: 'https://n8n.arecofix.com.ar/webhook/cv-generator',
-    GOOGLE_CLIENT_ID: '106654865765-im8ahudl24ck24tt6l4g7955i1mhp1kc.apps.googleusercontent.com'
+    SUPABASE_URL: 'https://db.arecofix.com.ar',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTc4ODEzNjc2MywiZXhwIjoyMTAzNzEyNzYzfQ.fHsIZeWhpCS9Q-oRYvK2sQflcdNZusDI25klGsuXcb8'
 };

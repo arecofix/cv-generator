@@ -1,79 +1,115 @@
 import { CONFIG } from '../config.js';
-import { StorageService } from './storageService.js';
 
 export class AuthService {
     constructor(onAuthChange) {
-        this.currentUserEmail = null;
+        this.supabase = null;
+        this.currentUser = null;
         this.onAuthChange = onAuthChange;
     }
 
-    init() {
-        this.tryInitGoogle();
-    }
-
-    tryInitGoogle() {
-        if (this._googleInitialized) return true;
-        if (window.google && window.google.accounts) {
-            google.accounts.id.initialize({
-                client_id: CONFIG.GOOGLE_CLIENT_ID,
-                callback: this.handleCredentialResponse.bind(this)
-            });
-            this._googleInitialized = true;
-            return true;
-        } else {
-            console.warn("Google Accounts script not loaded yet");
-            return false;
+    async init() {
+        if (!window.supabase) {
+            console.error("Supabase script not loaded");
+            return;
         }
-    }
-
-    handleCredentialResponse(response) {
-        try {
-            const payload = this.decodeJwtResponse(response.credential);
-            this.currentUserEmail = payload.email;
-            
-            if (this.onAuthChange) {
-                this.onAuthChange({
-                    isAuthenticated: true,
-                    email: payload.email,
-                    name: payload.name,
-                    given_name: payload.given_name,
-                    picture: payload.picture
-                });
+        this.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        
+        // Listen to auth changes (login, logout)
+        this.supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                this.currentUser = session.user;
+                this._notifyAuthChange(true);
+            } else {
+                this.currentUser = null;
+                this._notifyAuthChange(false);
             }
-        } catch (error) {
-            console.error("Error parsing Google JWT", error);
-        }
-    }
+        });
 
-    decodeJwtResponse(token) {
-        let base64Url = token.split('.')[1];
-        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-    }
-
-    signIn() {
-        if (this.tryInitGoogle()) {
-            google.accounts.id.prompt();
+        // Initial session check
+        const { data: { session } } = await this.supabase.auth.getSession();
+        if (session) {
+            this.currentUser = session.user;
+            this._notifyAuthChange(true);
         } else {
-            console.error("Google accounts library not loaded yet.");
-            alert("El servicio de Google aún se está cargando. Por favor, intenta de nuevo en unos segundos.");
+            this._notifyAuthChange(false);
         }
     }
 
-    signOut() {
-        this.currentUserEmail = null;
-        if (window.google && window.google.accounts) {
-            google.accounts.id.disableAutoSelect();
-        }
-        if (this.onAuthChange) {
+    _notifyAuthChange(isAuthenticated) {
+        if (!this.onAuthChange) return;
+        
+        if (isAuthenticated && this.currentUser) {
+            const meta = this.currentUser.user_metadata || {};
+            this.onAuthChange({
+                isAuthenticated: true,
+                email: this.currentUser.email,
+                name: meta.full_name || meta.name || '',
+                picture: meta.avatar_url || meta.picture || ''
+            });
+        } else {
             this.onAuthChange({ isAuthenticated: false });
         }
     }
 
+    async signInWithGoogle() {
+        if (!this.supabase) return;
+        // This will redirect to Supabase which handles Google OAuth without local origin mismatch
+        const { error } = await this.supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.href // return back here
+            }
+        });
+        if (error) {
+            alert('Error al conectar con Google: ' + error.message);
+        }
+    }
+
+    async signInWithPassword(email, password) {
+        if (!this.supabase) return;
+        const { data, error } = await this.supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+        if (error) {
+            alert('Error al iniciar sesión: ' + (error.message === 'Invalid login credentials' ? 'Credenciales inválidas' : error.message));
+        } else {
+            alert('Sesión iniciada con éxito');
+        }
+    }
+
+    async signUp(email, password, fullName) {
+        if (!this.supabase) return;
+        const { data, error } = await this.supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    full_name: fullName
+                }
+            }
+        });
+        
+        if (error) {
+            alert('Error al registrarse: ' + error.message);
+        } else {
+            // Check if email confirmation is needed
+            if (data.user && data.user.identities && data.user.identities.length === 0) {
+                 alert('Este email ya está registrado. Intenta iniciar sesión.');
+            } else if (data.session === null) {
+                 alert('Registro exitoso. Por favor revisa tu correo para confirmar la cuenta (si está configurado), o intenta iniciar sesión.');
+            } else {
+                 alert('Registro exitoso. ¡Bienvenido!');
+            }
+        }
+    }
+
+    async signOut() {
+        if (!this.supabase) return;
+        await this.supabase.auth.signOut();
+    }
+
     getCurrentUserEmail() {
-        return this.currentUserEmail;
+        return this.currentUser ? this.currentUser.email : null;
     }
 }
