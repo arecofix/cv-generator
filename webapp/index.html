@@ -1,24 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV Generator | Anti-ATS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.7);
+            --bg-input: rgba(15, 23, 42, 0.5);
+            --border: #475569;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             background-image: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Nav / Header */
+        .top-nav {
+            width: 100%;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: flex-end;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .profile-btn {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            color: var(--text-main);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-btn:hover {
+            background: #334155;
+            border-color: #64748b;
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -26,7 +76,7 @@
         }
 
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
+            background: var(--bg-panel);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -36,513 +86,530 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             padding: 2.5rem;
             position: relative;
-            overflow: hidden;
         }
 
-        .decoration-top,
-        .decoration-bottom {
-            position: absolute;
-            width: 12rem;
-            height: 12rem;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.2;
-            pointer-events: none;
-        }
-
-        .decoration-top {
-            top: -6rem;
-            right: -6rem;
-            background: #3b82f6;
-        }
-
-        .decoration-bottom {
-            bottom: -6rem;
-            left: -6rem;
-            background: #a855f7;
-        }
-
-        .content {
-            position: relative;
-            z-index: 10;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
+        /* Typography */
         h1 {
-            font-size: 2.25rem;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
             font-weight: 700;
             margin-bottom: 0.5rem;
+            text-align: center;
             background: linear-gradient(to right, #60a5fa, #a855f7);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        header p {
-            color: #94a3b8;
-            font-size: 0.9rem;
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
+        /* Forms */
         .field {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         label {
             display: block;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #cbd5e1;
             margin-bottom: 0.5rem;
         }
 
-        input[type="text"],
-        textarea {
+        input, textarea, select {
             width: 100%;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid #475569;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
             border-radius: 0.5rem;
             padding: 0.75rem 1rem;
-            color: #e2e8f0;
-            font-family: inherit;
+            color: var(--text-main);
             font-size: 0.95rem;
-            transition: all 0.2s;
+            transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus,
-        textarea:focus {
+        input:focus, textarea:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
         textarea {
-            resize: none;
-            min-height: 10rem;
+            resize: vertical;
+            min-height: 100px;
         }
 
-        button {
+        .btn-primary {
             width: 100%;
-            background: #2563eb;
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 0.5rem;
-            padding: 0.875rem 1.5rem;
-            font-size: 1rem;
+            padding: 0.875rem;
             font-weight: 600;
-            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .flex-row .field { margin-bottom: 0; flex: 1; }
+
+        /* Dynamic Lists */
+        .list-container {
+            border-left: 2px solid var(--border);
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .list-item {
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            position: relative;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            width: 100%;
+            max-width: 54rem;
+            max-height: 90vh;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Integration Buttons */
+        .integrations {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px dashed var(--border);
+            flex-wrap: wrap;
+        }
+
+        .btn-google {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
-            transition: all 0.2s;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+        
+        .section-title {
+            margin: 1.5rem 0 1rem;
+            font-size: 1.2rem;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
         }
 
-        button:hover:not(:disabled) {
-            background: #3b82f6;
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
+        /* States */
+        .state { display: none; text-align: center; margin-top: 2rem; padding: 1.5rem; border-radius: 0.5rem; }
+        .state.visible { display: block; }
+        .state-success { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .state-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; }
+        
         .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-left-color: #3b82f6;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-left-color: var(--primary);
             border-radius: 50%;
             width: 24px;
             height: 24px;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flex-row { flex-direction: column; gap: 0; }
+            .top-nav { justify-content: center; padding: 1rem; }
         }
-
-        .state {
-            display: none;
-            margin-top: 2rem;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            text-align: center;
-        }
-
-        .state.visible {
-            display: block;
-        }
-
-        .state-loading {
-            color: #94a3b8;
-        }
-
-        .state-success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.2);
-        }
-
-        .state-success h3 {
-            color: #4ade80;
-            margin-bottom: 0.5rem;
-        }
-
-        .state-success p {
-            color: #cbd5e1;
-            font-size: 0.875rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .state-success a {
-            display: inline-block;
-            background: #1e293b;
-            color: white;
-            text-decoration: none;
-            padding: 0.625rem 1.5rem;
-            border-radius: 0.5rem;
-            border: 1px solid #475569;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .state-success a:hover {
-            background: #334155;
-        }
-
-        .state-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .state-error h3 {
-            color: #f87171;
-            margin-bottom: 0.5rem;
-        }
-
-        .state-error p {
-            color: #cbd5e1;
-            font-size: 0.875rem;
-        }
-
-        .retry-info {
-            margin-top: 0.75rem;
-            font-size: 0.8rem;
-            color: #94a3b8;
-            font-style: italic;
-        }
-
-        /* Profile Button & Modal */
-        .profile-btn {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid #475569;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            color: #e2e8f0;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-            z-index: 20;
-        }
-        .profile-btn:hover {
-            background: #334155;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(15, 23, 42, 0.8);
-            align-items: center;
-            justify-content: center;
-        }
-        .modal.visible {
-            display: flex;
-        }
-        .close-btn {
-            position: absolute;
-            right: 1.5rem;
-            top: 1.5rem;
-            color: #94a3b8;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close-btn:hover { color: white; }
     </style>
 </head>
-
 <body>
-    <main class="glass-panel">
-        <div class="decoration-top"></div>
-        <div class="decoration-bottom"></div>
 
-        <button class="profile-btn" id="openProfileBtn">👤 Mi Perfil</button>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <button class="profile-btn" id="openProfileBtn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            Mi Perfil
+        </button>
+    </nav>
 
-        <div class="content">
-            <header>
-                <h1>Anti-ATS CV Generator</h1>
-                <p>Pega la descripción del trabajo (JD) y deja que la IA forje el CV perfecto basado en tu Master CV.
-                </p>
-            </header>
-
-            <form id="cvForm" novalidate>
+    <!-- Main Generator Content -->
+    <main class="container">
+        <div class="glass-panel">
+            <h1>Anti-ATS CV Generator</h1>
+            <p class="subtitle">Forja el CV perfecto de una sola página adaptado a cualquier oferta de trabajo usando Inteligencia Artificial.</p>
+            
+            <form id="generatorForm">
                 <div class="field">
-                    <label for="jobTitle">Título del Puesto</label>
-                    <input type="text" id="jobTitle" name="jobTitle" required
-                        placeholder="Ej: Senior Full Stack Engineer">
+                    <label>Título del Puesto</label>
+                    <input type="text" id="jobTitle" required placeholder="Ej: Senior Software Engineer">
                 </div>
-
                 <div class="field">
-                    <label for="jobDescription">Job Description (JD)</label>
-                    <textarea id="jobDescription" name="jobDescription" required
-                        placeholder="Pega aquí los requerimientos técnicos y responsabilidades del puesto..."></textarea>
+                    <label>Job Description (Requisitos)</label>
+                    <textarea id="jobDesc" required placeholder="Pega aquí la descripción completa de la vacante..."></textarea>
                 </div>
-
-                <button type="submit" id="submitBtn">
-                    <span id="btnText">Generar CV Optimizado</span>
-                    <svg id="btnIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
+                
+                <button type="submit" class="btn-primary" id="generateBtn">
+                    <span id="generateText">Generar CV Optimizado (1 Pág)</span>
                 </button>
             </form>
 
-            <div id="loadingState" class="state state-loading">
+            <div id="loadingState" class="state">
                 <div class="spinner"></div>
-                <p id="loadingMsg">Analizando JD y cruzando datos con Master CV...</p>
+                <p>Optimizando tu perfil para 1 sola página y burlando al ATS...</p>
             </div>
-
-            <div id="resultState" class="state state-success">
-                <h3>¡CV Generado con Éxito!</h3>
-                <p>Tu currículum ha sido optimizado y empaquetado en formato PDF.</p>
-                <a id="downloadLink" href="#" download="CV_Optimizado.pdf">Descargar PDF</a>
+            
+            <div id="successState" class="state state-success">
+                <h3 style="margin-bottom:1rem">¡CV Generado!</h3>
+                <a id="downloadBtn" href="#" class="btn-primary" style="text-decoration:none">Descargar PDF</a>
             </div>
-
+            
             <div id="errorState" class="state state-error">
-                <h3>Ocurrió un error</h3>
-                <p id="errorMsg">No se pudo contactar con el webhook.</p>
-                <p class="retry-info" id="retryInfo"></p>
-            </div>
-        </div>
-
-        <!-- Profile Modal -->
-        <div id="profileModal" class="modal">
-            <div class="glass-panel" style="max-width: 32rem; padding: 2rem;">
-                <span class="close-btn" id="closeProfileBtn">&times;</span>
-                <h2 style="margin-bottom: 1.5rem;">Datos del Perfil</h2>
-                <form id="profileForm">
-                    <div class="field">
-                        <label for="profileName">Nombre Completo</label>
-                        <input type="text" id="profileName" placeholder="Ej: Juan Pérez">
-                    </div>
-                    <div class="field">
-                        <label for="profileEmail">Email</label>
-                        <input type="text" id="profileEmail" placeholder="Ej: juan@ejemplo.com">
-                    </div>
-                    <div class="field">
-                        <label for="profilePhone">Teléfono / LinkedIn</label>
-                        <input type="text" id="profilePhone" placeholder="Opcional">
-                    </div>
-                    <button type="submit">Guardar Perfil</button>
-                </form>
+                <h3 style="margin-bottom:0.5rem">Error de conexión</h3>
+                <p id="errorMsgText">Si usas AdBlocker o Brave, desactívalo temporalmente o permite las conexiones a n8n.</p>
             </div>
         </div>
     </main>
 
+    <!-- Full Profile Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configuración de Mi Perfil Base</h2>
+                <button class="btn-secondary" id="closeProfileBtn" style="border:none; font-size:1.5rem">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="integrations">
+                    <button type="button" class="btn-google" onclick="alert('La integración con Google OAuth requiere configurar un Client ID en el backend. Próximamente.')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        Autocompletar con Google
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('cvUpload').click()">📄 Subir CV Existente (PDF/Word)</button>
+                    <input type="file" id="cvUpload" style="display:none" accept=".pdf,.doc,.docx" onchange="alert('El parser de CVs en el backend está en desarrollo. Por favor llena los datos manualmente.')">
+                </div>
+
+                <form id="profileForm">
+                    <h3 class="section-title">Datos Personales & Contacto</h3>
+                    <div class="flex-row">
+                        <div class="field"><label>Nombre Completo</label><input type="text" id="p_name"></div>
+                        <div class="field"><label>Email</label><input type="email" id="p_email"></div>
+                    </div>
+                    <div class="flex-row">
+                        <div class="field"><label>Teléfono</label><input type="text" id="p_phone"></div>
+                        <div class="field"><label>Ubicación (Ciudad, País)</label><input type="text" id="p_location"></div>
+                    </div>
+                    <div class="flex-row">
+                        <div class="field"><label>LinkedIn URL</label><input type="text" id="p_linkedin"></div>
+                        <div class="field"><label>GitHub / Portfolio</label><input type="text" id="p_portfolio"></div>
+                    </div>
+
+                    <h3 class="section-title">Sobre Mí</h3>
+                    <div class="field">
+                        <textarea id="p_about" placeholder="Breve resumen profesional..."></textarea>
+                    </div>
+
+                    <h3 class="section-title">
+                        Experiencia Laboral 
+                        <button type="button" class="btn-secondary" style="float:right" onclick="addExperience()">+ Añadir</button>
+                    </h3>
+                    <div id="experienceList" class="list-container"></div>
+
+                    <h3 class="section-title">
+                        Educación 
+                        <button type="button" class="btn-secondary" style="float:right" onclick="addEducation()">+ Añadir</button>
+                    </h3>
+                    <div id="educationList" class="list-container"></div>
+
+                    <h3 class="section-title">Habilidades & Idiomas</h3>
+                    <div class="field">
+                        <label>Habilidades (separadas por coma)</label>
+                        <input type="text" id="p_skills" placeholder="Ej: React, Node.js, Python, Gestión de Proyectos">
+                    </div>
+                    <div class="field">
+                        <label>Idiomas</label>
+                        <input type="text" id="p_languages" placeholder="Ej: Español (Nativo), Inglés (C1)">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button type="button" class="btn-primary" style="width:auto" onclick="saveProfile()">Guardar Perfil</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ============ CONFIG ============
+        // CONFIG
         const WEBHOOK_URL = 'https://n8n.arecofix.com.ar/webhook/cv-generator';
-        const MAX_RETRIES = 3;
-        const RETRY_DELAY_MS = 2000;   // backoff exponencial: 2s, 4s, 8s
-        const TIMEOUT_MS = 180000;     // 3 minutos
+        let profileData = { experiences: [], educations: [] };
 
-        // ============ DOM ============
-        const form = document.getElementById('cvForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const btnIcon = document.getElementById('btnIcon');
-        const loadingState = document.getElementById('loadingState');
-        const loadingMsg = document.getElementById('loadingMsg');
-        const resultState = document.getElementById('resultState');
-        const errorState = document.getElementById('errorState');
-        const errorMsg = document.getElementById('errorMsg');
-        const retryInfo = document.getElementById('retryInfo');
-        const downloadLink = document.getElementById('downloadLink');
+        // DOM Elements
+        const modal = document.getElementById('profileModal');
+        const expList = document.getElementById('experienceList');
+        const eduList = document.getElementById('educationList');
 
-        // Modal Elements
-        const profileModal = document.getElementById('profileModal');
-        const openProfileBtn = document.getElementById('openProfileBtn');
-        const closeProfileBtn = document.getElementById('closeProfileBtn');
-        const profileForm = document.getElementById('profileForm');
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profilePhone = document.getElementById('profilePhone');
+        // Modal Controls
+        document.getElementById('openProfileBtn').onclick = () => { loadProfileToForm(); modal.classList.add('visible'); };
+        const closeModal = () => modal.classList.remove('visible');
 
-        // ============ HELPERS ============
-        function setState(state, message) {
-            loadingState.classList.remove('visible');
-            resultState.classList.remove('visible');
-            errorState.classList.remove('visible');
-
-            if (state === 'loading') {
-                loadingMsg.textContent = message || 'Analizando JD y cruzando datos con Master CV...';
-                loadingState.classList.add('visible');
-                submitBtn.disabled = true;
-                btnText.textContent = 'Generando...';
-            } else if (state === 'success') {
-                resultState.classList.add('visible');
-                submitBtn.disabled = false;
-                btnText.textContent = 'Generar CV Optimizado';
-                btnIcon.style.display = '';
-            } else if (state === 'error') {
-                errorMsg.textContent = message || 'No se pudo contactar con el webhook.';
-                errorState.classList.add('visible');
-                submitBtn.disabled = false;
-                btnText.textContent = 'Reintentar';
-                btnIcon.style.display = '';
-            }
+        // Dynamic Lists: Experience
+        function addExperience(data = {}) {
+            const id = Date.now() + Math.random();
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove()">&times;</button>
+                <div class="flex-row">
+                    <div class="field"><label>Empresa</label><input type="text" class="exp-company" value="${data.company || ''}"></div>
+                    <div class="field"><label>Cargo</label><input type="text" class="exp-role" value="${data.role || ''}"></div>
+                </div>
+                <div class="flex-row">
+                    <div class="field"><label>Inicio</label><input type="text" class="exp-start" value="${data.start || ''}" placeholder="MM/YYYY"></div>
+                    <div class="field"><label>Fin</label><input type="text" class="exp-end" value="${data.end || ''}" placeholder="MM/YYYY o Actual"></div>
+                </div>
+                <div class="field">
+                    <label>Descripción y Logros</label>
+                    <textarea class="exp-desc">${data.description || ''}</textarea>
+                </div>
+            `;
+            expList.appendChild(div);
         }
 
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+        // Dynamic Lists: Education
+        function addEducation(data = {}) {
+            const id = Date.now() + Math.random();
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove()">&times;</button>
+                <div class="flex-row">
+                    <div class="field"><label>Institución</label><input type="text" class="edu-inst" value="${data.institution || ''}"></div>
+                    <div class="field"><label>Carrera / Título</label><input type="text" class="edu-degree" value="${data.degree || ''}"></div>
+                </div>
+                <div class="flex-row">
+                    <div class="field"><label>Año Inicio</label><input type="text" class="edu-start" value="${data.start || ''}"></div>
+                    <div class="field"><label>Año Fin</label><input type="text" class="edu-end" value="${data.end || ''}"></div>
+                </div>
+            `;
+            eduList.appendChild(div);
         }
 
-        // ============ FETCH CON RETRY + TIMEOUT ============
-        async function fetchWithRetry(url, options, attempt = 1) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+        // Save & Load
+        function saveProfile() {
+            // Extract basic info
+            profileData = {
+                name: document.getElementById('p_name').value,
+                email: document.getElementById('p_email').value,
+                phone: document.getElementById('p_phone').value,
+                location: document.getElementById('p_location').value,
+                linkedin: document.getElementById('p_linkedin').value,
+                portfolio: document.getElementById('p_portfolio').value,
+                about: document.getElementById('p_about').value,
+                skills: document.getElementById('p_skills').value,
+                languages: document.getElementById('p_languages').value,
+                experiences: [],
+                educations: []
+            };
 
-            try {
-                const response = await fetch(url, {
-                    ...options,
-                    signal: controller.signal,
-                    // Forzar HTTP/2 evitando QUIC cuando el navegador lo soporte
-                    cache: 'no-store',
-                    keepalive: false
+            // Extract experiences
+            document.querySelectorAll('#experienceList .list-item').forEach(item => {
+                profileData.experiences.push({
+                    company: item.querySelector('.exp-company').value,
+                    role: item.querySelector('.exp-role').value,
+                    start: item.querySelector('.exp-start').value,
+                    end: item.querySelector('.exp-end').value,
+                    description: item.querySelector('.exp-desc').value
                 });
-                clearTimeout(timeoutId);
-                return response;
-            } catch (err) {
-                clearTimeout(timeoutId);
-                const isNetworkError = err.name === 'TypeError' || err.name === 'AbortError';
-                const isQuicError = String(err.message).includes('QUIC') || String(err.message).includes('Failed to fetch');
+            });
 
-                if (attempt < MAX_RETRIES && (isNetworkError || isQuicError)) {
-                    const delay = RETRY_DELAY_MS * Math.pow(2, attempt - 1);
-                    retryInfo.textContent = `Reintentando (${attempt}/${MAX_RETRIES - 1}) en ${delay / 1000}s...`;
-                    console.warn(`⚠️ Intento ${attempt} falló. Reintentando en ${delay}ms...`, err);
-                    await sleep(delay);
-                    return fetchWithRetry(url, options, attempt + 1);
-                }
-                throw err;
-            }
+            // Extract educations
+            document.querySelectorAll('#educationList .list-item').forEach(item => {
+                profileData.educations.push({
+                    institution: item.querySelector('.edu-inst').value,
+                    degree: item.querySelector('.edu-degree').value,
+                    start: item.querySelector('.edu-start').value,
+                    end: item.querySelector('.edu-end').value
+                });
+            });
+
+            localStorage.setItem('cv_master_profile', JSON.stringify(profileData));
+            closeModal();
+            alert("Perfil guardado con éxito.");
         }
 
-        // ============ PERFIL ============
-        function loadProfile() {
-            const profile = JSON.parse(localStorage.getItem('cv_profile') || '{}');
-            profileName.value = profile.name || '';
-            profileEmail.value = profile.email || '';
-            profilePhone.value = profile.phone || '';
-            return profile;
+        function loadProfileToForm() {
+            const saved = localStorage.getItem('cv_master_profile');
+            if (!saved) return;
+            
+            profileData = JSON.parse(saved);
+            document.getElementById('p_name').value = profileData.name || '';
+            document.getElementById('p_email').value = profileData.email || '';
+            document.getElementById('p_phone').value = profileData.phone || '';
+            document.getElementById('p_location').value = profileData.location || '';
+            document.getElementById('p_linkedin').value = profileData.linkedin || '';
+            document.getElementById('p_portfolio').value = profileData.portfolio || '';
+            document.getElementById('p_about').value = profileData.about || '';
+            document.getElementById('p_skills').value = profileData.skills || '';
+            document.getElementById('p_languages').value = profileData.languages || '';
+
+            expList.innerHTML = '';
+            (profileData.experiences || []).forEach(exp => addExperience(exp));
+            
+            eduList.innerHTML = '';
+            (profileData.educations || []).forEach(edu => addEducation(edu));
         }
-        
-        loadProfile(); // Cargar al inicio
 
-        openProfileBtn.addEventListener('click', () => profileModal.classList.add('visible'));
-        closeProfileBtn.addEventListener('click', () => profileModal.classList.remove('visible'));
-        
-        profileForm.addEventListener('submit', (e) => {
+        // Init load silently
+        loadProfileToForm();
+
+        // Main Form Submit
+        document.getElementById('generatorForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            localStorage.setItem('cv_profile', JSON.stringify({
-                name: profileName.value.trim(),
-                email: profileEmail.value.trim(),
-                phone: profilePhone.value.trim()
-            }));
-            profileModal.classList.remove('visible');
-        });
+            
+            const title = document.getElementById('jobTitle').value.trim();
+            const desc = document.getElementById('jobDesc').value.trim();
+            
+            // Critical Rule injection
+            const fullJD = `Título: ${title}\n\nJD:\n${desc}\n\nREGLA ESTRICTA DE FORMATO: Todo el contenido del CV DEBE caber en UNA SOLA PÁGINA (1 hoja) de PDF. Sé extremadamente sintético y conciso, prioriza los logros más relevantes y recorta textos largos.`;
 
-        // ============ SUBMIT ============
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+            document.getElementById('generatorForm').style.display = 'none';
+            document.getElementById('loadingState').classList.add('visible');
+            document.getElementById('errorState').classList.remove('visible');
+            document.getElementById('successState').classList.remove('visible');
 
-            const jobTitle = document.getElementById('jobTitle').value.trim();
-            const jobDescription = document.getElementById('jobDescription').value.trim();
-
-            if (!jobDescription) {
-                setState('error', 'La descripción del puesto (JD) no puede estar vacía.');
-                return;
-            }
-
-            // Combinamos título + JD como un solo campo (así lo espera el prompt de n8n)
-            const fullJD = jobTitle
-                ? `Título: ${jobTitle}\n\nJD:\n${jobDescription}`
-                : jobDescription;
-
-            const userProfile = loadProfile();
-
-            setState('loading');
-            retryInfo.textContent = '';
+            // Actualizar datos del perfil si no han abierto el modal pero hay en memoria
+            const saved = localStorage.getItem('cv_master_profile');
+            const dataToSend = saved ? JSON.parse(saved) : profileData;
 
             try {
-                const response = await fetchWithRetry(WEBHOOK_URL, {
+                const res = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         job_description: fullJD,
-                        profile: userProfile
+                        profile: dataToSend
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                console.log('✅ Respuesta del webhook:', data);
-
-                if (!data.success || !data.url_pdf) {
-                    throw new Error('La respuesta del servidor no contiene el PDF esperado.');
-                }
-
-                // Actualizamos el link de descarga con el nombre real del archivo
-                downloadLink.href = data.url_pdf;
-                downloadLink.download = data.file_name || 'CV_Optimizado.pdf';
-                downloadLink.textContent = `Descargar ${data.file_name || 'PDF'}`;
-
-                setState('success');
-            } catch (err) {
-                console.error('❌ Error final:', err);
-                let msg = 'No se pudo generar el CV. ';
-                if (err.name === 'AbortError') {
-                    msg += 'La operación tardó más de 3 minutos. Intentá de nuevo.';
-                } else if (String(err.message).includes('Failed to fetch') || String(err.message).includes('QUIC')) {
-                    msg += 'Error de red. Verificá tu conexión o desactivá QUIC en el navegador (chrome://flags/#enable-quic).';
+                if (!res.ok) throw new Error('Error en el webhook');
+                
+                const data = await res.json();
+                
+                if (data.url_pdf) {
+                    document.getElementById('loadingState').classList.remove('visible');
+                    document.getElementById('successState').classList.add('visible');
+                    document.getElementById('downloadBtn').href = data.url_pdf;
+                    document.getElementById('downloadBtn').download = data.file_name || 'CV_1_Pagina.pdf';
                 } else {
-                    msg += err.message;
+                    throw new Error('No PDF URL in response');
                 }
-                setState('error', msg);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loadingState').classList.remove('visible');
+                document.getElementById('errorState').classList.add('visible');
+                document.getElementById('generatorForm').style.display = 'block';
             }
         });
     </script>
 </body>
-
 </html>
