@@ -3,47 +3,119 @@
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "cv-generator",
-        "responseMode": "lastNode",
-        "options": {
-          "respondWithCors": true
-        }
+        "jsCode": "const buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst fileName = $('Ensamblaje HTML').first().json.file_name || 'CV_Ezequiel.pdf';\n\nreturn {\n  json: {\n    success: true,\n    url_pdf: `data:application/pdf;base64,${buffer.toString('base64')}`,\n    file_name: fileName\n  }\n};"
       },
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
+      "name": "Final Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        0,
-        300
-      ]
+        1440,
+        608
+      ],
+      "id": "462dc84b-eec3-4e2f-8ad7-02b49336de37"
     },
     {
       "parameters": {
-        "url": "http://kong:8000/rest/v1/experiencia_laboral?select=*",
+        "method": "POST",
+        "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "name": "Gotenberg PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1232,
+        608
+      ],
+      "id": "d7f458dd-a2ae-4778-b13f-b399457d0bf7"
+    },
+    {
+      "parameters": {
+        "jsCode": "let template = `<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>CV - {{nombre_completo}} | {{titulo_adaptado}}</title>\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400&display=swap');\n        @page { size: A4; margin: 1cm; }\n        * { box-sizing: border-box; margin: 0; padding: 0; }\n        body { font-family: 'Montserrat', sans-serif; font-size: 10.5pt; line-height: 1.5; color: #111; background-color: #fff; }\n        \n        .header-container { display: flex; align-items: center; text-align: center; margin-bottom: 12px; }\n        .header-container::before, .header-container::after { content: ''; flex: 1; border-bottom: 2px solid #000; }\n        .header-container::before { margin-right: 15px; }\n        .header-container::after { margin-left: 15px; }\n        \n        h1 { font-size: 18pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }\n        \n        .profile-desc { text-align: center; font-size: 10.5pt; font-style: italic; margin-bottom: 15px; padding: 0 10px; }\n        \n        .section-title { display: flex; align-items: center; text-align: center; margin-top: 15px; margin-bottom: 15px; }\n        .section-title::before, .section-title::after { content: ''; flex: 1; border-bottom: 2px solid #000; }\n        .section-title::before { margin-right: 15px; }\n        .section-title::after { margin-left: 15px; }\n        .section-title h2 { font-size: 14pt; font-weight: 700; text-transform: uppercase; white-space: nowrap; }\n        \n        .contact-info { text-align: center; font-size: 10pt; font-weight: 600; margin-bottom: 10px; }\n        .contact-info a { color: #0056b3; text-decoration: none; }\n        \n        .experience-item { margin-bottom: 12px; }\n        .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }\n        .experience-header .company { font-weight: 700; font-size: 11pt; }\n        .experience-header .dates { font-size: 10.5pt; }\n        .experience-subheader { font-weight: 600; margin-bottom: 6px; }\n        \n        ul { list-style-type: disc; padding-left: 20px; }\n        li { margin-bottom: 4px; line-height: 1.5; }\n        \n        .education-item { margin-bottom: 10px; }\n        .education-header { display: flex; justify-content: space-between; align-items: baseline; }\n        .education-header .inst { font-weight: 600; }\n        .education-header .dates { font-size: 10.5pt; }\n        .education-subheader { font-weight: 700; margin-bottom: 4px; }\n        .education-details { padding-left: 20px; font-size: 10pt; }\n        \n        .skills-section p { text-align: center; font-size: 10.5pt; line-height: 1.8; }\n        .skills-section strong { font-weight: 700; }\n    </style>\n</head>\n<body>\n    <div class=\"header-container\">\n        <h1>{{nombre_completo}}</h1>\n    </div>\n    <div class=\"profile-desc\">\n        {{resumen_perfil}}\n    </div>\n    \n    <div class=\"section-title\"><h2>CONTACTO</h2></div>\n    <div class=\"contact-info\">\n        <a href=\"https://{{github_url}}\">{{github_url}}</a> - {{ciudad}} - <a href=\"mailto:{{email}}\">{{email}}</a> - <a href=\"{{portfolio_url}}\">{{portfolio_url}}</a>\n    </div>\n    \n    <div class=\"section-title\"><h2>EXPERIENCIA PROFESIONAL</h2></div>\n    {{experiencias_html}}\n    \n    <div class=\"section-title\"><h2>EDUCACIÓN</h2></div>\n    {{educacion_html}}\n    \n    <div class=\"section-title\"><h2>HABILIDADES Y TÉCNICAS</h2></div>\n    <div class=\"skills-section\">\n        <p>{{skills_html}}</p>\n    </div>\n</body>\n</html>`;\n\n// ===================== PARSER ROBUSTO v2 =====================\n// Cloudflare puede devolver el JSON en 3 lugares distintos según el modelo:\n//   A) result.response  → OBJETO ya parseado (llama-3.3-70b-json)\n//   B) result.response  → STRING con JSON embebido (llama-3-8b-instruct clásico)\n//   C) choices[0].message.content → STRING formato OpenAI-compatible\n// Este parser cubre los 3 casos sin romperse.\n\nfunction extractCvData(input) {\n    // Caso A: ya es objeto\n    if (input && typeof input === 'object' && !Array.isArray(input)) {\n        return input;\n    }\n    // Caso B/C: es string con posible basura alrededor\n    if (typeof input === 'string') {\n        let s = input.replace(/```json/gi, '').replace(/```/gi, '').trim();\n        const fb = s.indexOf('{');\n        const lb = s.lastIndexOf('}');\n        if (fb !== -1 && lb !== -1 && lb > fb) {\n            s = s.substring(fb, lb + 1);\n        }\n        return JSON.parse(s);\n    }\n    throw new Error('Tipo no soportado: ' + typeof input);\n}\n\nlet cvData = null;\nconst nodeData = $input.first().json;\n\ntry {\n    if (nodeData.success === false) {\n        throw new Error('Cloudflare AI devolvió success=false: ' + JSON.stringify(nodeData.errors || nodeData.messages));\n    }\n\n    if (nodeData.result && nodeData.result.response !== undefined && nodeData.result.response !== null) {\n        // Formato estándar Workers AI (objeto u string, da igual)\n        cvData = extractCvData(nodeData.result.response);\n    } else if (nodeData.choices && nodeData.choices[0] && nodeData.choices[0].message && nodeData.choices[0].message.content) {\n        // Formato OpenAI-compatible\n        cvData = extractCvData(nodeData.choices[0].message.content);\n    } else if (nodeData.response !== undefined) {\n        // Response a nivel raíz\n        cvData = extractCvData(nodeData.response);\n    } else {\n        throw new Error('Estructura de respuesta de Cloudflare no reconocida');\n    }\n\n    // Sanity check: debe traer al menos experiencias o título\n    if (!cvData.experiencias && !cvData.titulo_adaptado) {\n        throw new Error('JSON parseado no tiene estructura esperada. Keys: ' + Object.keys(cvData).join(','));\n    }\n\n    console.log('✅ CV parseado OK. Título:', cvData.titulo_adaptado, '| Experiencias:', (cvData.experiencias || []).length);\n} catch (error) {\n    console.warn('⚠️ Fallback activado. Motivo:', error.message);\n    cvData = {\n        titulo_adaptado: 'Software Developer',\n        resumen_perfil: 'Profesional con sólida formación en desarrollo de software, informática y sistemas. Enfoque en arquitectura de alta disponibilidad, backend autoalojado y optimización de datos.',\n        experiencias: [],\n        educacion: [],\n        skills_agrupadas: 'Backend: Supabase, PostgreSQL, Django | Frontend: Angular, React, Tailwind | DevOps: Docker, Cloudflare, Linux'\n    };\n}\n\nconst persona = {\n  github_url: 'github.com/arecofix',\n  nombre_completo: 'Ezequiel Enrico Areco',\n  ciudad: 'Marcos Paz, Buenos Aires, Argentina',\n  email: 'ezequielenrico15@gmail.com',\n  telefono: '+54 11 1234-5678',\n  linkedin_url: 'https://www.linkedin.com/in/ezequiel-areco',\n  portfolio_url: 'https://portfolio.arecofix.com.ar'\n};\n\n// ===================== ARMADO DE HTML =====================\nlet expHtml = '';\nif (Array.isArray(cvData.experiencias)) {\n    cvData.experiencias.forEach(exp => {\n        const bullets = Array.isArray(exp.bullets) ? exp.bullets : [];\n        const bulletsHtml = bullets.map(b => `<li>${b}</li>`).join('');\n        expHtml += `<div class=\"experience-item\">\n            <div class=\"experience-header\">\n                <span class=\"company\">${exp.empresa || ''}</span>\n                <span class=\"dates\">${(exp.fechas || '').replace(/[^0-9 -Actualidad]/g, '').substring(0,25)}</span>\n            </div>\n            <div class=\"experience-subheader\">${exp.puesto || ''}</div>\n            <ul>${bulletsHtml}</ul>\n        </div>`;\n    });\n}\n\nlet eduHtml = '';\nif (Array.isArray(cvData.educacion)) {\n    cvData.educacion.forEach(edu => {\n        eduHtml += `<div class=\"education-item\">\n            <div class=\"education-header\">\n                <span class=\"inst\">${edu.institucion_y_anio ? edu.institucion_y_anio.split('|')[0] : ''}</span>\n                <span class=\"dates\">${edu.institucion_y_anio ? edu.institucion_y_anio.split('|')[1] : ''}</span>\n            </div>\n            <div class=\"education-subheader\">${edu.titulo || ''}</div>\n            <div class=\"education-details\">${edu.detalles || ''}</div>\n        </div>`;\n    });\n}\n\ntemplate = template.replace('{{titulo_adaptado}}', cvData.titulo_adaptado || '');\ntemplate = template.replace('{{resumen_perfil}}', cvData.resumen_perfil || '');\ntemplate = template.replace('{{experiencias_html}}', expHtml);\ntemplate = template.replace('{{educacion_html}}', eduHtml);\ntemplate = template.replace('{{skills_html}}', (cvData.skills_agrupadas || '').replace(/(Frontend:|Backend:|DevOps:|Idiomas:|Languages:|Databases:)/g, '<strong>$1</strong>'));\n\ntemplate = template.replace(/{{nombre_completo}}/g, persona.nombre_completo);\ntemplate = template.replace(/{{ciudad}}/g, persona.ciudad);\ntemplate = template.replace(/{{email}}/g, persona.email);\ntemplate = template.replace(/{{telefono}}/g, persona.telefono);\ntemplate = template.replace(/{{linkedin_url}}/g, persona.linkedin_url);\ntemplate = template.replace(/{{github_url}}/g, persona.github_url);\ntemplate = template.replace(/{{portfolio_url}}/g, persona.portfolio_url);\n\nconst buffer = Buffer.from(template, 'utf-8');\nconst tituloSlug = (cvData.titulo_adaptado || 'CV').replace(/\\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');\n\nreturn {\n  json: {\n    html_final: template,\n    file_name: `Ezequiel_Enrico_${tituloSlug}_CV.pdf`,\n    debug_titulo: cvData.titulo_adaptado,\n    debug_num_experiencias: (cvData.experiencias || []).length,\n    debug_num_educacion: (cvData.educacion || []).length\n  },\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'index.html'\n    }\n  }\n};"
+      },
+      "name": "Ensamblaje HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        608
+      ],
+      "id": "0e208f03-1047-4ffd-990e-8608ced1b412"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudflare.com/client/v4/accounts/d43201aa7c78ff1a8e65376a7fb6fbf3/ai/run/@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "cloudflareApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
-              "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
-            },
-            {
-              "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
+              "name": "Content-Type",
+              "value": "application/json"
             }
           ]
         },
-        "options": {}
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.ai_payload) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
       },
-      "name": "Supabase Experiencia",
+      "name": "IA - Cloudflare Workers AI",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        200,
-        200
+        832,
+        608
       ],
-      "alwaysOutputData": true
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "id": "a2143800-fd1e-4b19-bef3-a7f6617fae8a",
+      "credentials": {
+        "cloudflareApi": {
+          "id": "ybkyBMHWPwS8niwy",
+          "name": "Cloudflare account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============ DATOS CRUDOS DE SUPABASE ============\nconst experiencia = $('Supabase Experiencia').all().map(i => i.json).filter(i => i && i.id);\nconst educacion_raw = $('Supabase Educacion').all().map(i => i.json).filter(i => i && i.id);\n\nconst uniqueExperiencia = [...new Map(experiencia.map(item => {\n  const s = item.fecha_inicio ? item.fecha_inicio.substring(0,4) : '';\n  const e = (!item.fecha_fin || item.fecha_fin === 'null') ? 'Actualidad' : item.fecha_fin.substring(0,4);\n  item.fechas = s + ' - ' + e;\n  return [item.id, item];\n})).values()];\nconst uniqueEducacionRaw = [...new Map(educacion_raw.map(item => {\n  const s = item.detalles && item.detalles.fecha_inicio ? item.detalles.fecha_inicio.substring(0,4) : '';\n  const e = item.detalles && item.detalles.fecha_fin ? item.detalles.fecha_fin.substring(0,4) : (item.detalles && item.detalles.fechas ? item.detalles.fechas : 'Actualidad');\n  item.fechas = s ? (s + ' - ' + e) : e;\n  return [item.id, item];\n})).values()];\n\n// ============ SEPARAR POR TIPO (clave para que la IA no se pierda) ============\nconst educacion = uniqueEducacionRaw.filter(e => e.tipo === 'educacion');\nconst skills    = uniqueEducacionRaw.filter(e => e.tipo === 'skill');\nconst certificaciones = uniqueEducacionRaw.filter(e => e.tipo === 'certificacion');\n\n// ============ NORMALIZAR SKILLS (aplanar el objeto anidado) ============\nconst skillsAplanadas = skills.map(s => {\n  const d = s.detalles || {};\n  return {\n    frontend: d.frontend || [],\n    languages: d.languages || [],\n    devops_and_tools: d.devops_and_tools || [],\n    backend_and_databases: d.backend_and_databases || []\n  };\n});\n\n// ============ NORMALIZAR CERTIFICACIONES ============\nconst certificacionesAplanadas = certificaciones.map(c => ({\n  titulo: c.titulo,\n  idiomas: c.detalles?.idiomas || '',\n  certificados: c.detalles?.certificados || []\n}));\n\n// ============ MASTER CV ESTRUCTURADO ============\nconst master_cv = {\n  experiencia_laboral: uniqueExperiencia,\n  educacion: educacion,\n  skills: skillsAplanadas,\n  certificaciones: certificacionesAplanadas\n};\n\nconst job_description = $('Webhook').first().json?.body?.job_description || 'Desarrollador de Software';\n\n// ============ PROMPT EXPLÍCITO CON CONTEOS ============\nconst systemPrompt = 'Eres un experto en optimización de CVs para sistemas ATS. DEBES devolver ÚNICAMENTE un objeto JSON válido, sin bloques markdown, sin explicaciones. Si no cumples el formato o los conteos, el sistema falla.';\n\nconst userPrompt = [\n  'Adapta el Master CV a la Oferta de Trabajo siguiendo ESTRICTAMENTE estas reglas:',\n  '',\n  '=== REGLAS OBLIGATORIAS (romperlas es un fallo crítico) ===',\n  '',\n  `REGLA 1 - INCLUIR TODAS LAS EXPERIENCIAS (NO OPCIONAL):`,\n  `El Master CV tiene exactamente ${uniqueExperiencia.length} experiencias laborales. DEBES incluir las ${uniqueExperiencia.length} en el array \"experiencias\" de tu respuesta. NO omitas ninguna por parecer poco relevante. NUNCA cambies empresa, puesto ni fechas.`,\n  '',\n  `REGLA 2 - INCLUIR TODA LA EDUCACIÓN (NO OPCIONAL):`,\n  `El Master CV tiene exactamente ${educacion.length} entradas de educación formal. DEBES incluir las ${educacion.length} en el array \"educacion\". NO omitas ninguna.`,\n  '',\n  'REGLA 3 - CERO ALUCINACIÓN DE IDENTIDAD:',\n  'El candidato se llama Ezequiel Enrico Areco. BAJO NINGUNA CIRCUNSTANCIA inventes o modifiques nombres de empresas, cargos, fechas ni títulos universitarios.',\n  '',\n  'REGLA 4 - SKILL SWAPPING INTELIGENTE:',\n  'Solo si la oferta es del sector IT, reemplaza tecnologías del Master CV por las de la oferta cuando pertenezcan al mismo paradigma (Angular↔React, PostgreSQL↔MySQL). Si la oferta NO es del sector IT (electricista, técnico, etc.), NO apliques swapping: mantené las tecnologías originales y enfocá el resumen en competencias transferibles (resolución de problemas, docencia técnica, trabajo autónomo).',\n  '',\n  'REGLA 5 - LONGITUD DE BULLETS:',\n  'Cada experiencia debe tener entre 2 y 3 bullets optimizados. Esto se refiere a los bullets DENTRO de cada experiencia, NO a la cantidad de experiencias (que deben ser todas).',\n  '',\n  '=== FORMATO DE SALIDA (JSON ESTRICTO, sin ```json ni texto extra) ===',\n  '{',\n  '  \"titulo_adaptado\": \"El título exacto de la oferta laboral\",',\n  '  \"resumen_perfil\": \"Párrafo de 3 líneas en primera persona, sin nombrarte, orientado a la oferta\",',\n  '  \"experiencias\": [',\n  '    {',\n  '      \"empresa\": \"EMPRESA ORIGINAL\",',\n  '      \"fechas\": \"FECHAS\",',\n  '      \"puesto\": \"PUESTO ORIGINAL\",',\n  '      \"bullets\": [\"bullet 1\", \"bullet 2\"]',\n  '    }',\n  '  ],',\n  '  \"educacion\": [',\n  '    {',\n  '      \"titulo\": \"TÍTULO\",',\n  '      \"institucion_y_anio\": \"INSTITUCIÓN | AÑO\",',\n  '      \"detalles\": \"Detalles relevantes\"',\n  '    }',\n  '  ],',\n  '  \"certificaciones\": [\"cert 1\", \"cert 2\"],',\n  '  \"idiomas\": \"Inglés (B2)\",',\n  '  \"skills_agrupadas\": \"Backend: ... | Frontend: ... | DevOps: ...\"',\n  '}',\n  '',\n  '=== OFERTA DE TRABAJO ===',\n  job_description,\n  '',\n  '=== MASTER CV ===',\n  JSON.stringify(master_cv),\n  '',\n  '=== RECORDATORIO FINAL ===',\n  `Tu respuesta DEBE tener exactamente ${uniqueExperiencia.length} experiencias y ${educacion.length} entradas de educación. Verificalo antes de responder.`\n].join('\\n');\n\nconst ai_payload = {\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user', content: userPrompt }\n  ],\n  max_tokens: 4096,\n  temperature: 0.15,\n  response_format: { type: 'json_object' }\n};\n\nreturn {\n  json: {\n    master_cv,\n    job_description,\n    ai_payload,\n    _meta: {\n      expected_experiencias: uniqueExperiencia.length,\n      expected_educacion: educacion.length,\n      expected_certificaciones: certificaciones.length\n    }\n  }\n};"
+      },
+      "name": "Unificar CV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        608
+      ],
+      "id": "7019387f-f550-433a-bd53-385ed376adac"
     },
     {
       "parameters": {
@@ -67,150 +139,64 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        200,
-        400
+        432,
+        704
       ],
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "id": "e6795d7b-313c-441b-ad2c-c55370e3e6df"
     },
     {
       "parameters": {
-        "jsCode": "const webhookBody = $('Webhook').first().json?.body || {};\nconst userProfile = webhookBody.profile || null;\n\nconst experiencia = $('Supabase Experiencia').all().map(i => i.json).filter(i => i && i.id);\nconst educacion_raw = $('Supabase Educacion').all().map(i => i.json).filter(i => i && i.id);\nconst uniqueExperiencia = [...new Map(experiencia.map(item => {\n      const s = item.fecha_inicio ? item.fecha_inicio.substring(0,4) : '';\n      const e = (!item.fecha_fin || item.fecha_fin === 'null') ? 'Actualidad' : item.fecha_fin.substring(0,4);\n      item.fechas_procesadas = s + ' - ' + e;\n      return [item.id, item];\n    })).values()];\nconst uniqueEducacionRaw = [...new Map(educacion_raw.map(item => [item.id, item])).values()];\nconst educacion = uniqueEducacionRaw.filter(e => e.tipo === 'educacion');\nconst skills = uniqueEducacionRaw.filter(e => e.tipo === 'skill');\n\nlet finalExperiencias = uniqueExperiencia.map(e => ({ empresa: e.empresa, puesto: e.puesto_base, fechas: e.fechas_procesadas, bullets: e.bullet_points }));\nlet finalEducacion = educacion;\nlet finalSkills = skills.map(s => s.detalles || {});\n\nif (userProfile) {\n  if (userProfile.experiences && userProfile.experiences.length > 0) {\n    finalExperiencias = userProfile.experiences.map((exp, i) => {\n      const startYear = exp.start ? exp.start.toString().substring(0,4) : '';\n      const endYear = (!exp.end || exp.end === 'null' || exp.end === '') ? 'Actualidad' : exp.end.toString().substring(0,4);\n      return { id: 'u-exp'+i, empresa: exp.company, puesto: exp.role, fechas: startYear + ' - ' + endYear, descripcion: exp.description };\n    });\n  }\n  if (userProfile.educations && userProfile.educations.length > 0) {\n    finalEducacion = userProfile.educations.map((edu, i) => {\n      const startYear = edu.start ? edu.start.toString().substring(0,4) : '';\n      const endYear = (!edu.end || edu.end === 'null' || edu.end === '') ? 'Actualidad' : edu.end.toString().substring(0,4);\n      return { id: 'u-edu'+i, titulo: edu.degree, institucion: edu.institution, fechas: startYear + ' - ' + endYear };\n    });\n  }\n  if (userProfile.skills || userProfile.languages) {\n    finalSkills = userProfile.skills + ' | Idiomas: ' + userProfile.languages;\n  }\n}\n\nconst master_cv = { experiencia_laboral: finalExperiencias, educacion: finalEducacion, skills: finalSkills };\nconst job_description = webhookBody.job_description || 'Desarrollador';\n\nconst systemPrompt = 'Eres un experto en optimización de CVs para sistemas ATS. DEBES devolver ÚNICAMENTE un objeto JSON válido.';\nconst userPrompt = [\n  'Adapta el Master CV a la Oferta de Trabajo con estas REGLAS ESTRICTAS:',\n  'REGLA 1 - INCLUIR TODAS LAS EXPERIENCIAS: Usa las ' + finalExperiencias.length + ' experiencias.',\n  'REGLA 2 - FECHAS CORTAS: Extrae SOLO EL AÑO de las fechas (Ej: \"2020 - 2023\"). NUNCA meses ni días.',\n  'REGLA 3 - LONGITUD (1 PÁGINA): Usa máximo 1 o 2 bullets por experiencia. Muy breves.',\n  'FORMATO DE SALIDA (JSON ESTRICTO):',\n  '{ \"titulo_adaptado\": \"...\", \"resumen_perfil\": \"...\", \"experiencias\": [ { \"empresa\": \"...\", \"fechas\": \"SÓLO AÑO\", \"puesto\": \"...\", \"bullets\": [\"...\"] } ], \"educacion\": [ { \"titulo\": \"...\", \"institucion_y_anio\": \"...\", \"detalles\": \"...\" } ], \"skills_agrupadas\": \"...\" }',\n  '=== OFERTA ===', job_description, '=== MASTER CV ===', JSON.stringify(master_cv)\n].join('\\n');\n\nconst ai_payload = { messages: [ { role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt } ], max_tokens: 4096, temperature: 0.15, response_format: { type: 'json_object' } };\n\nreturn { json: { master_cv, job_description, ai_payload } };"
-      },
-      "name": "Unificar CV",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        400,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=AQ.Ab8RN6JALdg3PN6-t0hlwP2IytcDCE0eaajnL2QpNDTim7RpbA",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  contents: [\n    {\n      parts: [\n        {\n          text: `Eres un experto en optimización de CVs para sistemas ATS. Adapta mi Master CV al Job Description proporcionado siguiendo ESTRICTAMENTE las siguientes reglas:\n\nREGLA 1 - CERO ALUCINACIÓN DE IDENTIDAD:\nTu nombre es Ezequiel Gabriel Enrico Areco. BAJO NINGUNA CIRCUNSTANCIA puedes inventar o modificar los nombres de las empresas, los cargos originales, las fechas ni los títulos universitarios. La estructura base debe ser idéntica.\n\nREGLA 2 - SKILL SWAPPING INTELIGENTE:\nReemplaza tecnologías del Master CV por las de la oferta SÓLO si pertenecen al mismo paradigma (ej. Angular por React, PostgreSQL por MySQL, AWS por Google Cloud). Si la oferta ya pide algo que tienes, MANTENLO intacto.\n\nREGLA 3 - LONGITUD ESTRICTA:\nSelecciona máximo 2 o 3 bullet points por experiencia. Exprime el texto para que el CV final sea contundente.\n\nFORMATO DE SALIDA OBLIGATORIO (JSON ESTRICTO):\nDevuelve ÚNICAMENTE un objeto JSON. ESTÁ PROHIBIDO GENERAR ETIQUETAS HTML. Solo devuelve los datos crudos estructurados así:\n{\n  \"titulo_adaptado\": \"[El título exacto de la oferta laboral]\",\n  \"resumen_perfil\": \"[Párrafo de 3 líneas contundente basándose en la experiencia real]\",\n  \"experiencias\": [\n    {\n      \"empresa\": \"[EMPRESA ORIGINAL]\",\n      \"fechas\": \"[FECHAS]\",\n      \"puesto\": \"[PUESTO ORIGINAL]\",\n      \"bullets\": [\"[bullet optimizado 1]\", \"[bullet optimizado 2]\"]\n    }\n  ],\n  \"educacion\": [\n    {\n      \"titulo\": \"[TÍTULO]\",\n      \"institucion_y_anio\": \"[INSTITUCIÓN | AÑO]\",\n      \"detalles\": \"[Detalles relevantes]\"\n    }\n  ],\n  \"skills_agrupadas\": \"[Backend: Tech1, Tech2 | Frontend: Tech3, Tech4]\"\n}\n\nJob Description (Oferta de Trabajo):\n${$('Webhook').item.json.body.job_description || ''}\n\nMaster CV:\n${JSON.stringify($('Unificar CV').item.json.master_cv)}`\n        }\n      ]\n    }\n  ],\n  generationConfig: {\n    responseMimeType: \"application/json\",\n    temperature: 0.2\n  }\n}) }}",
-        "options": {}
-      },
-      "name": "IA - Generador CV",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        600,
-        300
-      ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
-    },
-    {
-      "parameters": {
-        "jsCode": "let template = `<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>CV - {{nombre_completo} | {{titulo_adaptado}}</title>\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400&display=swap');\n        @page { size: A4; margin: 1cm; }\n        * { box-sizing: border-box; margin: 0; padding: 0; }\n        body { font-family: 'Montserrat', sans-serif; font-size: 10.5pt; line-height: 1.5; color: #111; background-color: #fff; }\n        \n        /* Flex container for header with lines */\n        .header-container { display: flex; align-items: center; text-align: center; margin-bottom: 12px; }\n        .header-container::before, .header-container::after { content: ''; flex: 1; border-bottom: 2px solid #000; }\n        .header-container::before { margin-right: 15px; }\n        .header-container::after { margin-left: 15px; }\n        \n        h1 { font-size: 18pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }\n        \n        .profile-desc { text-align: center; font-size: 10.5pt; font-style: italic; margin-bottom: 15px; padding: 0 10px; }\n        \n        .section-title { display: flex; align-items: center; text-align: center; margin-top: 15px; margin-bottom: 15px; }\n        .section-title::before, .section-title::after { content: ''; flex: 1; border-bottom: 2px solid #000; }\n        .section-title::before { margin-right: 15px; }\n        .section-title::after { margin-left: 15px; }\n        .section-title h2 { font-size: 14pt; font-weight: 700; text-transform: uppercase; white-space: nowrap; }\n        \n        .contact-info { text-align: center; font-size: 10pt; font-weight: 600; margin-bottom: 10px; }\n        .contact-info a { color: #0056b3; text-decoration: none; }\n        \n        .experience-item { margin-bottom: 12px; }\n        .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }\n        .experience-header .company { font-weight: 700; font-size: 11pt; }\n        .experience-header .dates { font-size: 10.5pt; }\n        .experience-subheader { font-weight: 600; margin-bottom: 6px; }\n        \n        ul { list-style-type: disc; padding-left: 20px; }\n        li { margin-bottom: 4px; line-height: 1.5; }\n        \n        .education-item { margin-bottom: 10px; }\n        .education-header { display: flex; justify-content: space-between; align-items: baseline; }\n        .education-header .inst { font-weight: 600; }\n        .education-header .dates { font-size: 10.5pt; }\n        .education-subheader { font-weight: 700; margin-bottom: 4px; }\n        .education-details { padding-left: 20px; font-size: 10pt; }\n        \n        .skills-section p { text-align: center; font-size: 10.5pt; line-height: 1.8; }\n        .skills-section strong { font-weight: 700; }\n    </style>\n</head>\n<body>\n    <div class=\"header-container\">\n        <h1>{{nombre_completo}}</h1>\n    </div>\n    <div class=\"profile-desc\">\n        {{resumen_perfil}}\n    </div>\n    \n    <div class=\"section-title\"><h2>CONTACTO</h2></div>\n    <div class=\"contact-info\">\n        <a href=\"https://{{github_url}}\">{{github_url}}</a> - {{ciudad}} - <a href=\"mailto:{{email}}\">{{email}}</a> - <a href=\"{{portfolio_url}}\">{{portfolio_url}}</a>\n    </div>\n    \n    <div class=\"section-title\"><h2>EXPERIENCIA PROFESIONAL</h2></div>\n    {{experiencias_html}}\n    \n    <div class=\"section-title\"><h2>EDUCACIÓN</h2></div>\n    {{educacion_html}}\n    \n    <div class=\"section-title\"><h2>HABILIDADES Y TÉCNICAS</h2></div>\n    <div class=\"skills-section\">\n        <p>{{skills_html}}</p>\n    </div>\n</body>\n</html>`;\n\nfunction extractCvData(input) {\n    if (input && typeof input === 'object' && !Array.isArray(input)) return input;\n    if (typeof input === 'string') {\n        let s = input.replace(/\\`json/gi, '').replace(/\\`/gi, '').trim();\n        const fb = s.indexOf('{');\n        const lb = s.lastIndexOf('}');\n        if (fb !== -1 && lb !== -1 && lb > fb) s = s.substring(fb, lb + 1);\n        return JSON.parse(s);\n    }\n    throw new Error('Tipo no soportado');\n}\n\nlet cvData = null;\nconst nodeData = $input.first().json;\n\ntry {\n    let rawText = '';\n    if (nodeData.candidates && nodeData.candidates[0].content && nodeData.candidates[0].content.parts) {\n        rawText = nodeData.candidates[0].content.parts[0].text;\n    } else if (nodeData.result && nodeData.result.response) {\n        rawText = nodeData.result.response;\n    } else if (nodeData.choices && nodeData.choices[0] && nodeData.choices[0].message) {\n        rawText = nodeData.choices[0].message.content;\n    } else if (nodeData.response) {\n        rawText = nodeData.response;\n    } else {\n        rawText = JSON.stringify(nodeData);\n    }\n    \n    cvData = extractCvData(rawText);\n    if (!cvData.experiencias) throw new Error('No se encontraron experiencias en el JSON');\n} catch (error) {\n    console.error('Error parseando JSON de IA:', error);\n    cvData = {\n        titulo_adaptado: 'Software Developer',\n        resumen_perfil: 'Profesional IT.',\n        experiencias: [],\n        educacion: [],\n        skills_agrupadas: ''\n    };\n}\n\nconst webhookBody = $('Webhook').first().json?.body || {};\nconst userProfile = webhookBody.profile || {};\n\nconst persona = {\n  github_url: userProfile.github || 'github.com/arecofix',\n  nombre_completo: userProfile.name || 'Ezequiel Enrico Areco',\n  ciudad: userProfile.location || 'Marcos Paz, Buenos Aires, Argentina',\n  email: userProfile.email || 'ezequielenrico15@gmail.com',\n  telefono: userProfile.phone || '+54 11 1234-5678',\n  linkedin_url: userProfile.linkedin || 'https://www.linkedin.com/in/ezequiel-areco',\n  portfolio_url: userProfile.portfolio || 'https://portfolio.arecofix.com.ar'\n};\n\nlet expHtml = '';\nif (Array.isArray(cvData.experiencias)) {\n    cvData.experiencias.forEach(exp => {\n        const bullets = Array.isArray(exp.bullets) ? exp.bullets : [];\n        const bulletsHtml = bullets.map(b => `<li>${b}</li>`).join('');\n        expHtml += `<div class=\"experience-item\">\n            <div class=\"experience-header\">\n                <span class=\"company\">${exp.empresa || ''}</span>\n                <span class=\"dates\">${exp.fechas || ''}</span>\n            </div>\n            <div class=\"experience-subheader\">${exp.puesto || ''}</div>\n            <ul>${bulletsHtml}</ul>\n        </div>`;\n    });\n}\n\nlet eduHtml = '';\nif (Array.isArray(cvData.educacion)) {\n    cvData.educacion.forEach(edu => {\n        eduHtml += `<div class=\"education-item\">\n            <div class=\"education-header\">\n                <span class=\"inst\">${edu.institucion_y_anio ? edu.institucion_y_anio.split('|')[0] : ''}</span>\n                <span class=\"dates\">${edu.institucion_y_anio ? edu.institucion_y_anio.split('|')[1] : ''}</span>\n            </div>\n            <div class=\"education-subheader\">${edu.titulo || ''}</div>\n            <div class=\"education-details\">${edu.detalles || ''}</div>\n        </div>`;\n    });\n}\n\ntemplate = template.replace('{{titulo_adaptado}}', cvData.titulo_adaptado || '');\ntemplate = template.replace('{{resumen_perfil}}', cvData.resumen_perfil || '');\ntemplate = template.replace('{{experiencias_html}}', expHtml);\ntemplate = template.replace('{{educacion_html}}', eduHtml);\ntemplate = template.replace('{{skills_html}}', (cvData.skills_agrupadas || '').replace(/(Frontend:|Backend:|DevOps:|Idiomas:|Languages:|Databases:)/g, '<strong>$1</strong>'));\n\ntemplate = template.replace(/{{nombre_completo}}/g, persona.nombre_completo);\ntemplate = template.replace(/{{ciudad}}/g, persona.ciudad);\ntemplate = template.replace(/{{email}}/g, persona.email);\ntemplate = template.replace(/{{telefono}}/g, persona.telefono);\ntemplate = template.replace(/{{linkedin_url}}/g, persona.linkedin_url);\ntemplate = template.replace(/{{github_url}}/g, persona.github_url);\ntemplate = template.replace(/{{portfolio_url}}/g, persona.portfolio_url);\n\nconst buffer = Buffer.from(template, 'utf-8');\nconst tituloSlug = (cvData.titulo_adaptado || 'CV').replace(/\\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');\n\nreturn {\n  json: {\n    html_final: template,\n    file_name: `Ezequiel_Enrico_${tituloSlug}_CV.pdf`\n  },\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'index.html'\n    }\n  }\n};"
-      },
-      "name": "Ensamblaje HTML",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        800,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://gotenberg:3000/forms/chromium/convert/html",
-        "sendBody": true,
-        "contentType": "multipart-form-data",
-        "bodyParameters": {
+        "url": "http://kong:8000/rest/v1/experiencia_laboral?select=*",
+        "sendHeaders": true,
+        "headerParameters": {
           "parameters": [
             {
-              "parameterType": "formBinaryData",
-              "name": "files",
-              "inputDataFieldName": "data"
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjUyODAwMH0.rha7mrp1HqZTonRVvRMUNlWGTT1wQr28XT9yOum1xAA"
             }
           ]
         },
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "data"
-            }
-          }
-        }
+        "options": {}
       },
-      "name": "Gotenberg PDF",
+      "name": "Supabase Experiencia",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 3,
+      "typeVersion": 4,
       "position": [
-        1000,
-        300
-      ]
+        432,
+        496
+      ],
+      "alwaysOutputData": true,
+      "id": "950d1dc7-fb8e-42fe-8b59-cb4f695e06b0"
     },
     {
       "parameters": {
-        "jsCode": "const buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst fileName = $('Ensamblaje HTML').item.json.file_name || 'CV_Ezequiel.pdf';\n\nreturn {\n  json: {\n    url_pdf: `data:application/pdf;base64,${buffer.toString('base64')}`,\n    file_name: fileName\n  }\n};\n"
+        "httpMethod": "POST",
+        "path": "cv-generator",
+        "responseMode": "lastNode",
+        "options": {}
       },
-      "name": "Final Response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
       "position": [
-        1200,
-        300
-      ]
+        240,
+        608
+      ],
+      "id": "3eb36630-d0f0-4d9d-b1a8-0cf31124f6ad",
+      "webhookId": "3fb5bed6-6852-492d-9af6-c9220fbcb946"
     }
   ],
   "connections": {
-    "Webhook": {
+    "Gotenberg PDF": {
       "main": [
         [
           {
-            "node": "Supabase Experiencia",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase Experiencia": {
-      "main": [
-        [
-          {
-            "node": "Supabase Educacion",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase Educacion": {
-      "main": [
-        [
-          {
-            "node": "Unificar CV",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Unificar CV": {
-      "main": [
-        [
-          {
-            "node": "IA - Generador CV",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IA - Generador CV": {
-      "main": [
-        [
-          {
-            "node": "Ensamblaje HTML",
+            "node": "Final Response",
             "type": "main",
             "index": 0
           }
@@ -228,16 +214,64 @@
         ]
       ]
     },
-    "Gotenberg PDF": {
+    "IA - Cloudflare Workers AI": {
       "main": [
         [
           {
-            "node": "Final Response",
+            "node": "Ensamblaje HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificar CV": {
+      "main": [
+        [
+          {
+            "node": "IA - Cloudflare Workers AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Educacion": {
+      "main": [
+        [
+          {
+            "node": "Unificar CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Experiencia": {
+      "main": [
+        [
+          {
+            "node": "Supabase Educacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Supabase Experiencia",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "a9590b34e55c6b9354778a29a78bd9eaa935af471ee481e3604d7abcc4f6fbca"
   }
 }
