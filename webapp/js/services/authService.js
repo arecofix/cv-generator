@@ -12,7 +12,31 @@ export class AuthService {
             console.error("Supabase script not loaded");
             return;
         }
-        this.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+        // Resilient storage adapter to bypass Tracking Prevention blocks (Brave/Edge)
+        let storageAdapter;
+        try {
+            window.localStorage.setItem('__storage_test__', '1');
+            window.localStorage.removeItem('__storage_test__');
+            storageAdapter = window.localStorage;
+        } catch (e) {
+            console.warn("LocalStorage bloqueado por el navegador (Tracking Prevention). Usando almacenamiento en memoria.");
+            const memoryMap = {};
+            storageAdapter = {
+                getItem: (key) => memoryMap[key] || null,
+                setItem: (key, value) => { memoryMap[key] = value; },
+                removeItem: (key) => { delete memoryMap[key]; }
+            };
+        }
+
+        this.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
+            auth: {
+                storage: storageAdapter,
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
         
         // Listen to auth changes (login, logout)
         this.supabase.auth.onAuthStateChange((event, session) => {
